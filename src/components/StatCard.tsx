@@ -22,23 +22,23 @@ export default function StatCard({
 }: StatCardProps) {
   return (
     <div className={cn(
-      'bg-white rounded-lg shadow-sm p-6 border border-gray-100',
+      'bg-card rounded-lg shadow-sm p-6 border border-border transition-all duration-300 hover:shadow-md',
       className
     )}>
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-sm font-medium text-gray-500">{title}</p>
-          <p className="mt-1 text-3xl font-semibold">{value}</p>
+          <p className="text-sm font-medium text-muted-foreground">{title}</p>
+          <p className="mt-1 text-3xl font-semibold text-foreground">{value}</p>
           {description && (
-            <p className="mt-1 text-sm text-gray-500">{description}</p>
+            <p className="mt-1 text-sm text-muted-foreground">{description}</p>
           )}
           {trend && trendValue && (
             <div className="mt-2 flex items-center text-sm">
               <span className={cn(
                 'inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium',
-                trend === 'up' ? 'bg-green-100 text-green-800' : 
-                trend === 'down' ? 'bg-red-100 text-red-800' : 
-                'bg-gray-100 text-gray-800'
+                trend === 'up' ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' : 
+                trend === 'down' ? 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400' : 
+                'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300'
               )}>
                 {trend === 'up' ? '↑' : trend === 'down' ? '↓' : '•'} {trendValue}
               </span>
@@ -46,7 +46,7 @@ export default function StatCard({
           )}
         </div>
         {icon && (
-          <div className="p-3 bg-bloodRed-50 rounded-full">
+          <div className="p-3 bg-bloodRed-50 dark:bg-bloodRed-950/30 rounded-full">
             {icon}
           </div>
         )}

@@ -14,22 +14,31 @@ import BloodCollection from "@/pages/BloodCollection";
 import BloodRequests from "@/pages/BloodRequests";
 import Inventory from "@/pages/Inventory";
 import Settings from "@/pages/Settings";
+import { HOSPITAL_NAME } from "@/pages/Dashboard";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+      retry: 1,
+    },
+  },
+});
 
 const App = () => (
-  <ThemeProvider defaultTheme="light">
+  <ThemeProvider defaultTheme="system">
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
         <TooltipProvider>
           <Helmet
-            titleTemplate="%s | Blood Bank Management System"
-            defaultTitle="Blood Bank Management System"
+            titleTemplate={`%s | ${HOSPITAL_NAME} Blood Bank`}
+            defaultTitle={`${HOSPITAL_NAME} Blood Bank Management System`}
           >
-            <meta name="description" content="Blood Bank Management System" />
+            <meta name="description" content={`${HOSPITAL_NAME} Blood Bank Management System - Manage donors, blood collection, inventory and requests`} />
+            <meta name="theme-color" content="#E52222" />
           </Helmet>
           <Toaster />
-          <Sonner />
+          <Sonner richColors position="top-right" />
           <Routes>
             <Route 
               path="/" 

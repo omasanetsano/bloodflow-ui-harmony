@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet';
 import { 
@@ -9,7 +8,8 @@ import {
   FilterIcon,
   CalendarIcon,
   TrendingDownIcon,
-  TrendingUpIcon
+  TrendingUpIcon,
+  DownloadIcon
 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -74,7 +74,6 @@ export default function Inventory() {
       
       setInventory(inventoryData);
       
-      // Get units expiring in the next 7 days
       const today = new Date();
       const nextWeek = new Date();
       nextWeek.setDate(today.getDate() + 7);
@@ -144,6 +143,22 @@ export default function Inventory() {
     return colors[bloodType];
   }
 
+  const exportInventoryData = () => {
+    try {
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(inventory, null, 2));
+      const downloadAnchorNode = document.createElement('a');
+      downloadAnchorNode.setAttribute("href", dataStr);
+      downloadAnchorNode.setAttribute("download", `blood-inventory-${new Date().toISOString().slice(0, 10)}.json`);
+      document.body.appendChild(downloadAnchorNode);
+      downloadAnchorNode.click();
+      downloadAnchorNode.remove();
+      toast.success("Inventory data exported successfully");
+    } catch (error) {
+      console.error('Error exporting data:', error);
+      toast.error('Failed to export inventory data');
+    }
+  };
+
   const handleAdjustInventory = async () => {
     try {
       const item = inventory.find(i => i.bloodType === selectedBloodType);
@@ -153,7 +168,6 @@ export default function Inventory() {
         return;
       }
       
-      // Ensure we don't go below 0
       const newAvailable = Math.max(0, item.available + adjustmentAmount);
       const newTotal = Math.max(newAvailable, item.total + adjustmentAmount);
       
@@ -180,7 +194,7 @@ export default function Inventory() {
         <title>Inventory | {HOSPITAL_NAME} Blood Bank</title>
       </Helmet>
       
-      <div className="flex flex-col gap-8">
+      <div className="flex flex-col gap-8 animate-fade-in">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <h1 className="text-2xl font-bold tracking-tight">Blood Inventory</h1>
@@ -189,6 +203,14 @@ export default function Inventory() {
             </p>
           </div>
           <div className="flex flex-col sm:flex-row gap-3">
+            <Button 
+              variant="outline" 
+              onClick={exportInventoryData} 
+              className="flex gap-2 items-center"
+            >
+              <DownloadIcon className="h-4 w-4" />
+              Export Data
+            </Button>
             <Dialog open={ajustInventoryOpen} onOpenChange={setAdjustInventoryOpen}>
               <DialogTrigger asChild>
                 <Button className="bg-bloodRed-500 hover:bg-bloodRed-600 text-white">
@@ -280,26 +302,32 @@ export default function Inventory() {
           </div>
         </div>
 
-        {/* Inventory Overview Chart */}
         <section>
-          <Card className="bg-gradient-to-br from-card to-secondary/80 backdrop-blur-sm">
+          <Card className="bg-gradient-to-br from-card to-secondary/80 backdrop-blur-sm transition-all duration-300 hover:shadow-md">
             <CardHeader>
               <CardTitle className="text-lg font-medium">Inventory Overview</CardTitle>
               <CardDescription>Current blood levels by type</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="h-[300px]">
+              <div className="h-[300px] w-full">
                 <ChartContainer config={{}}>
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart
                       data={chartData}
                       margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+                      layout="vertical"
+                      barSize={20}
+                      barGap={8}
                     >
-                      <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
-                      <XAxis dataKey="name" />
-                      <YAxis label={{ value: 'Units', angle: -90, position: 'insideLeft' }} />
+                      <CartesianGrid strokeDasharray="3 3" opacity={0.2} horizontal={true} vertical={false} />
+                      <XAxis type="number" domain={[0, 'dataMax + 5']} />
+                      <YAxis type="category" dataKey="name" width={50} />
                       <Tooltip content={<ChartTooltipContent />} />
-                      <Bar dataKey="value" name="Available Units">
+                      <Bar 
+                        dataKey="value" 
+                        name="Available Units"
+                        radius={[0, 4, 4, 0]}
+                      >
                         {chartData.map((entry, index) => (
                           <Cell key={`cell-${index}`} fill={entry.fill} />
                         ))}
@@ -312,7 +340,6 @@ export default function Inventory() {
           </Card>
         </section>
 
-        {/* Inventory Levels Table */}
         <section>
           <Card className="bg-gradient-to-br from-card to-accent/30 backdrop-blur-sm">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -420,7 +447,6 @@ export default function Inventory() {
           </Card>
         </section>
 
-        {/* Expiring Blood Units */}
         <section>
           <Card className="bg-gradient-to-br from-card to-primary/5 backdrop-blur-sm">
             <CardHeader>

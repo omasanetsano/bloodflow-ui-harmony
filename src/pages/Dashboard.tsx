@@ -7,7 +7,9 @@ import {
   ClipboardListIcon, 
   AlertTriangleIcon,
   RefreshCwIcon,
-  BarChart3Icon 
+  BarChart3Icon,
+  DownloadIcon,
+  FileTextIcon
 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import StatCard from '@/components/StatCard';
@@ -39,6 +41,7 @@ import {
   ChartTooltip, 
   ChartTooltipContent 
 } from '@/components/ui/chart';
+import Logo from '@/components/Logo';
 
 // Define the hospital name
 export const HOSPITAL_NAME = "LifeFlow Medical Center";
@@ -141,6 +144,45 @@ export default function Dashboard() {
     toast.success('Dashboard refreshed');
     fetchDashboardData();
   };
+  
+  // Function to export analytics data
+  const exportAnalytics = () => {
+    try {
+      const exportData = {
+        date: new Date().toISOString(),
+        hospitalName: HOSPITAL_NAME,
+        inventoryStats,
+        donationStats,
+        summary: {
+          totalDonors,
+          totalUnits,
+          totalRequests,
+          criticalTypes
+        }
+      };
+      
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(exportData, null, 2));
+      const downloadAnchorNode = document.createElement('a');
+      downloadAnchorNode.setAttribute("href", dataStr);
+      downloadAnchorNode.setAttribute("download", `blood-bank-analytics-${new Date().toISOString().slice(0, 10)}.json`);
+      document.body.appendChild(downloadAnchorNode);
+      downloadAnchorNode.click();
+      downloadAnchorNode.remove();
+      toast.success("Analytics data exported successfully");
+    } catch (error) {
+      console.error('Error exporting data:', error);
+      toast.error('Failed to export analytics data');
+    }
+  };
+  
+  // Generate PDF report
+  const generateReport = () => {
+    toast.success("PDF report generation initiated");
+    // In a real app, this would connect to a PDF generation service
+    setTimeout(() => {
+      toast.success("Blood bank report has been generated and is ready for download");
+    }, 2000);
+  };
 
   const chartConfig = {
     'A+': { color: '#F87171' },
@@ -159,24 +201,47 @@ export default function Dashboard() {
       <Helmet>
         <title>Dashboard | {HOSPITAL_NAME} Blood Bank</title>
       </Helmet>
-      <div className="flex flex-col gap-8">
+      <div className="flex flex-col gap-8 animate-fade-in">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
-            <p className="text-muted-foreground">
-              {HOSPITAL_NAME} Blood Bank Management System
-            </p>
+          <div className="flex items-center gap-3">
+            <Logo size="lg" />
+            <div>
+              <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
+              <p className="text-muted-foreground">
+                {HOSPITAL_NAME} Blood Bank Management System
+              </p>
+            </div>
           </div>
-          <Button 
-            variant="outline" 
-            size="sm" 
-            className="w-full sm:w-auto"
-            onClick={handleRefresh}
-            disabled={loading}
-          >
-            <RefreshCwIcon className="w-4 h-4 mr-2" />
-            Refresh Data
-          </Button>
+          <div className="flex flex-wrap gap-2">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="flex gap-2 items-center"
+              onClick={exportAnalytics}
+            >
+              <DownloadIcon className="w-4 h-4" />
+              Export Analytics
+            </Button>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="flex gap-2 items-center"
+              onClick={generateReport}
+            >
+              <FileTextIcon className="w-4 h-4" />
+              Generate Report
+            </Button>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="flex gap-2 items-center"
+              onClick={handleRefresh}
+              disabled={loading}
+            >
+              <RefreshCwIcon className="w-4 h-4" />
+              Refresh
+            </Button>
+          </div>
         </div>
 
         {/* Overview Stats */}
