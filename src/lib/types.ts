@@ -1,19 +1,17 @@
-
 export type BloodType = 'A+' | 'A-' | 'B+' | 'B-' | 'AB+' | 'AB-' | 'O+' | 'O-';
 
-export type Donor = {
+export interface Donor {
   id: string;
   name: string;
   age: number;
   gender: 'Male' | 'Female' | 'Other';
   bloodType: BloodType;
   phone: string;
-  email: string;
-  address: string;
-  lastDonation: string | null;
+  email?: string;
+  address?: string;
+  lastDonation: Date | null;
   donationCount: number;
-  createdAt: string;
-};
+}
 
 export type BloodUnit = {
   id: string;
@@ -45,3 +43,15 @@ export type InventoryStats = {
   available: number; // units
   reserved: number; // units
 };
+
+export interface DonationRecord {
+  id: string;
+  donorId: string;
+  donorName: string;
+  donorBloodType: BloodType;
+  date: Date;
+  quantity: number;
+  hemoglobin?: number;
+  notes?: string;
+  status: 'Processing' | 'Available' | 'Discarded';
+}

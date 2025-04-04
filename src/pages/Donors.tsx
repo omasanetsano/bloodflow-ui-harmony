@@ -4,7 +4,6 @@ import { Helmet } from 'react-helmet';
 import { 
   PlusIcon, 
   SearchIcon, 
-  DropletIcon,
   XIcon,
   UserPlusIcon
 } from 'lucide-react';
@@ -37,6 +36,7 @@ import {
 import { Donor, BloodType } from '@/lib/types';
 import { donorService } from '@/lib/mockData';
 import BloodTypeTag from '@/components/BloodTypeTag';
+import RecordDonationDialog from '@/components/RecordDonationDialog';
 import { toast } from 'sonner';
 
 export default function Donors() {
@@ -143,6 +143,10 @@ export default function Donors() {
       console.error('Error adding donor:', error);
       toast.error('Failed to add donor');
     }
+  };
+
+  const handleDonationRecorded = () => {
+    fetchDonors(); // Refresh donor list
   };
 
   return (
@@ -294,7 +298,7 @@ export default function Donors() {
 
         {/* Search Bar */}
         <div className="relative">
-          <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+          <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             className="pl-9 pr-10"
             placeholder="Search donors by name, ID, blood type..."
@@ -306,7 +310,7 @@ export default function Donors() {
               className="absolute right-3 top-1/2 transform -translate-y-1/2"
               onClick={clearSearch}
             >
-              <XIcon className="h-4 w-4 text-gray-400" />
+              <XIcon className="h-4 w-4 text-muted-foreground" />
             </button>
           )}
         </div>
@@ -318,14 +322,14 @@ export default function Donors() {
             Array.from({ length: 6 }).map((_, i) => (
               <Card key={i} className="animate-pulse">
                 <CardHeader className="pb-2">
-                  <div className="h-5 bg-gray-200 rounded w-3/4 mb-2"></div>
-                  <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+                  <div className="h-5 bg-muted rounded w-3/4 mb-2"></div>
+                  <div className="h-4 bg-muted rounded w-1/2"></div>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
-                    <div className="h-4 bg-gray-200 rounded w-full"></div>
-                    <div className="h-4 bg-gray-200 rounded w-full"></div>
-                    <div className="h-4 bg-gray-200 rounded w-2/3"></div>
+                    <div className="h-4 bg-muted rounded w-full"></div>
+                    <div className="h-4 bg-muted rounded w-full"></div>
+                    <div className="h-4 bg-muted rounded w-2/3"></div>
                   </div>
                 </CardContent>
               </Card>
@@ -345,29 +349,29 @@ export default function Donors() {
                 <CardContent>
                   <div className="space-y-2 text-sm">
                     <p className="flex items-center gap-2">
-                      <span className="text-gray-500">Phone:</span> {donor.phone}
+                      <span className="text-muted-foreground">Phone:</span> {donor.phone}
                     </p>
                     {donor.email && (
                       <p className="flex items-center gap-2">
-                        <span className="text-gray-500">Email:</span> {donor.email}
+                        <span className="text-muted-foreground">Email:</span> {donor.email}
                       </p>
                     )}
                     {donor.address && (
                       <p className="flex items-center gap-2">
-                        <span className="text-gray-500">Address:</span> {donor.address}
+                        <span className="text-muted-foreground">Address:</span> {donor.address}
                       </p>
                     )}
                     <p className="flex items-center gap-2">
-                      <span className="text-gray-500">Donations:</span> {donor.donationCount}
+                      <span className="text-muted-foreground">Donations:</span> {donor.donationCount}
                       {donor.lastDonation && ` • Last: ${new Date(donor.lastDonation).toLocaleDateString()}`}
                     </p>
                   </div>
                 </CardContent>
-                <CardFooter className="border-t bg-muted/20 p-3">
-                  <Button variant="outline" size="sm" className="w-full">
-                    <DropletIcon className="h-4 w-4 mr-2 text-bloodRed-500" />
-                    Record Donation
-                  </Button>
+                <CardFooter className="border-t bg-accent/10 p-3">
+                  <RecordDonationDialog 
+                    donor={donor} 
+                    onDonationRecorded={handleDonationRecorded}
+                  />
                 </CardFooter>
               </Card>
             ))
