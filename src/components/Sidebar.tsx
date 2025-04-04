@@ -1,0 +1,146 @@
+
+import { useState } from 'react';
+import { Link, useLocation } from 'react-router-dom';
+import { 
+  DropletIcon, 
+  UsersIcon, 
+  ClipboardListIcon, 
+  ArchiveIcon,
+  HomeIcon, 
+  Settings2Icon,
+  MenuIcon,
+  XIcon
+} from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
+
+type NavItem = {
+  name: string;
+  path: string;
+  icon: React.ReactNode;
+};
+
+const navItems: NavItem[] = [
+  { name: 'Dashboard', path: '/', icon: <HomeIcon className="w-5 h-5" /> },
+  { name: 'Donors', path: '/donors', icon: <UsersIcon className="w-5 h-5" /> },
+  { name: 'Blood Collection', path: '/collection', icon: <DropletIcon className="w-5 h-5" /> },
+  { name: 'Blood Requests', path: '/requests', icon: <ClipboardListIcon className="w-5 h-5" /> },
+  { name: 'Inventory', path: '/inventory', icon: <ArchiveIcon className="w-5 h-5" /> },
+  { name: 'Settings', path: '/settings', icon: <Settings2Icon className="w-5 h-5" /> },
+];
+
+export default function Sidebar() {
+  const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
+  const location = useLocation();
+  
+  return (
+    <>
+      {/* Mobile menu button */}
+      <div className="lg:hidden fixed top-4 left-4 z-30">
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={() => setIsMobileNavOpen(!isMobileNavOpen)}
+          aria-label="Toggle menu"
+        >
+          {isMobileNavOpen ? <XIcon className="h-5 w-5" /> : <MenuIcon className="h-5 w-5" />}
+        </Button>
+      </div>
+      
+      {/* Desktop sidebar */}
+      <div className="hidden lg:flex lg:flex-col h-screen w-64 bg-white border-r border-gray-200 fixed inset-y-0 left-0 z-20">
+        <div className="p-4 flex items-center gap-2 border-b">
+          <DropletIcon className="h-6 w-6 text-bloodRed-500" />
+          <span className="font-bold text-xl text-gray-900">Blood Bank</span>
+        </div>
+        
+        <div className="flex-1 py-6 px-4 space-y-1 overflow-y-auto">
+          {navItems.map((item) => (
+            <Link
+              key={item.path}
+              to={item.path}
+              className={cn(
+                "flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors",
+                location.pathname === item.path
+                  ? "bg-bloodRed-50 text-bloodRed-600"
+                  : "text-gray-700 hover:bg-gray-100"
+              )}
+            >
+              <span className={cn(
+                "mr-3",
+                location.pathname === item.path ? "text-bloodRed-500" : "text-gray-500"
+              )}>
+                {item.icon}
+              </span>
+              {item.name}
+            </Link>
+          ))}
+        </div>
+        
+        <div className="p-4 border-t">
+          <div className="flex items-center gap-3">
+            <div className="rounded-full w-8 h-8 bg-gray-200 flex items-center justify-center text-gray-700">
+              A
+            </div>
+            <div>
+              <p className="text-sm font-medium">Admin User</p>
+              <p className="text-xs text-gray-500">admin@bloodbank.org</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      {/* Mobile sidebar */}
+      <div className={cn(
+        "fixed inset-0 bg-black/50 z-20 lg:hidden transition-opacity",
+        isMobileNavOpen ? "opacity-100" : "opacity-0 pointer-events-none"
+      )}>
+        <div className={cn(
+          "fixed inset-y-0 left-0 w-72 bg-white transform transition-transform duration-300 ease-in-out",
+          isMobileNavOpen ? "translate-x-0" : "-translate-x-full"
+        )}>
+          <div className="p-4 flex items-center gap-2 border-b">
+            <DropletIcon className="h-6 w-6 text-bloodRed-500" />
+            <span className="font-bold text-xl text-gray-900">Blood Bank</span>
+          </div>
+          
+          <div className="flex-1 py-6 px-4 space-y-1 overflow-y-auto">
+            {navItems.map((item) => (
+              <Link
+                key={item.path}
+                to={item.path}
+                className={cn(
+                  "flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors",
+                  location.pathname === item.path
+                    ? "bg-bloodRed-50 text-bloodRed-600"
+                    : "text-gray-700 hover:bg-gray-100"
+                )}
+                onClick={() => setIsMobileNavOpen(false)}
+              >
+                <span className={cn(
+                  "mr-3",
+                  location.pathname === item.path ? "text-bloodRed-500" : "text-gray-500"
+                )}>
+                  {item.icon}
+                </span>
+                {item.name}
+              </Link>
+            ))}
+          </div>
+          
+          <div className="p-4 border-t">
+            <div className="flex items-center gap-3">
+              <div className="rounded-full w-8 h-8 bg-gray-200 flex items-center justify-center text-gray-700">
+                A
+              </div>
+              <div>
+                <p className="text-sm font-medium">Admin User</p>
+                <p className="text-xs text-gray-500">admin@bloodbank.org</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </>
+  );
+}
