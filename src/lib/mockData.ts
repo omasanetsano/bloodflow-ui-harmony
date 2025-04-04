@@ -1,4 +1,3 @@
-
 import { Donor, BloodType, BloodCollection, BloodRequest, InventoryItem, DonationRecord, BloodUnit, InventoryStats } from './types';
 import { format, addDays } from 'date-fns';
 
@@ -208,6 +207,11 @@ export const donorService = {
     return { success: true };
   },
   
+  getDonationRecords: async () => {
+    await new Promise(resolve => setTimeout(resolve, 400));
+    return mockDonations;
+  },
+  
   recordDonation: async (donorId: string, donationData: {
     date: Date;
     quantity: number;
@@ -364,6 +368,16 @@ export const inventoryService = {
     }));
     
     return stats;
+  },
+  
+  getInventoryItem: async (bloodType: BloodType) => {
+    await new Promise(resolve => setTimeout(resolve, 300));
+    
+    const bloodTypeKey = bloodType.replace('+', 'Pos').replace('-', 'Neg');
+    const item = bloodInventory[bloodTypeKey as keyof typeof bloodInventory];
+    
+    if (!item) throw new Error('Blood type not found in inventory');
+    return item;
   },
   
   updateInventoryItem: async (bloodType: BloodType, itemData: Partial<InventoryItem>) => {

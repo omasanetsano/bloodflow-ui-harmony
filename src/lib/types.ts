@@ -22,7 +22,7 @@ export type BloodUnit = {
   quantity: number; // in ml
   collectionDate: string;
   expiryDate: string;
-  status: 'Available' | 'Reserved' | 'Used' | 'Expired';
+  status: 'Available' | 'Reserved' | 'Used' | 'Expired' | 'Processing';
 };
 
 export type BloodRequest = {
