@@ -1,5 +1,6 @@
-import { Donor, BloodType, BloodCollection, BloodRequest, InventoryItem, DonationRecord } from './types';
-import { format } from 'date-fns';
+
+import { Donor, BloodType, BloodCollection, BloodRequest, InventoryItem, DonationRecord, BloodUnit, InventoryStats } from './types';
+import { format, addDays } from 'date-fns';
 
 // Mock data for donors
 let mockDonors: Donor[] = [
@@ -82,23 +83,65 @@ let mockBloodCollections: BloodCollection[] = [
   },
 ];
 
+// Mock data for blood units
+let mockBloodUnits: BloodUnit[] = [
+  {
+    id: 'BU001',
+    donorId: 'D0001',
+    donorName: 'John Smith',
+    bloodType: 'A+',
+    quantity: 450,
+    collectionDate: '2023-05-26',
+    expiryDate: '2023-06-25',
+    status: 'Available'
+  },
+  {
+    id: 'BU002',
+    donorId: 'D0002',
+    donorName: 'Alice Johnson',
+    bloodType: 'O-',
+    quantity: 400,
+    collectionDate: '2023-05-27',
+    expiryDate: '2023-06-26',
+    status: 'Available'
+  },
+  {
+    id: 'BU003',
+    donorId: 'D0003',
+    donorName: 'Bob Williams',
+    bloodType: 'B+',
+    quantity: 450,
+    collectionDate: '2023-05-20',
+    expiryDate: '2023-06-19',
+    status: 'Reserved'
+  }
+];
+
 // Mock data for blood requests
 let mockBloodRequests: BloodRequest[] = [
   {
     id: 'BR001',
-    date: new Date('2023-05-28'),
     patientName: 'Jane Doe',
+    patientAge: 45,
+    patientGender: 'Female',
     bloodType: 'O-',
     quantity: 2,
+    urgency: 'High',
+    hospital: 'City General Hospital',
+    requestDate: '2023-05-28',
     status: 'Pending',
   },
   {
     id: 'BR002',
-    date: new Date('2023-05-29'),
     patientName: 'Richard Roe',
+    patientAge: 62,
+    patientGender: 'Male',
     bloodType: 'A+',
     quantity: 1,
-    status: 'Completed',
+    urgency: 'Medium',
+    hospital: 'St. Mary Medical Center',
+    requestDate: '2023-05-29',
+    status: 'Fulfilled',
   },
 ];
 
@@ -310,6 +353,19 @@ export const inventoryService = {
     return Object.values(bloodInventory);
   },
   
+  getInventoryStats: async () => {
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
+    // Convert inventory items to inventory stats
+    const stats: InventoryStats[] = Object.values(bloodInventory).map(item => ({
+      bloodType: item.bloodType,
+      available: item.available,
+      reserved: item.total - item.available
+    }));
+    
+    return stats;
+  },
+  
   updateInventoryItem: async (bloodType: BloodType, itemData: Partial<InventoryItem>) => {
     await new Promise(resolve => setTimeout(resolve, 450));
     
@@ -318,5 +374,58 @@ export const inventoryService = {
     
     bloodInventory[bloodTypeKey as keyof typeof bloodInventory] = { ...bloodInventory[bloodTypeKey as keyof typeof bloodInventory], ...itemData };
     return bloodInventory[bloodTypeKey as keyof typeof bloodInventory];
+  }
+};
+
+export const bloodUnitService = {
+  getBloodUnits: async () => {
+    await new Promise(resolve => setTimeout(resolve, 500));
+    return mockBloodUnits;
+  },
+  
+  getBloodUnitById: async (id: string) => {
+    await new Promise(resolve => setTimeout(resolve, 300));
+    const unit = mockBloodUnits.find(unit => unit.id === id);
+    if (!unit) throw new Error('Blood unit not found');
+    return unit;
+  },
+  
+  addBloodUnit: async (unitData: Omit<BloodUnit, 'id' | 'expiryDate'>) => {
+    await new Promise(resolve => setTimeout(resolve, 400));
+    
+    const id = `BU${String(mockBloodUnits.length + 1).padStart(3, '0')}`;
+    
+    // Calculate expiry date (35 days after collection)
+    const collectionDate = new Date(unitData.collectionDate);
+    const expiryDate = addDays(collectionDate, 35).toISOString().split('T')[0];
+    
+    const newUnit: BloodUnit = {
+      id,
+      expiryDate,
+      ...unitData
+    };
+    
+    mockBloodUnits.unshift(newUnit);
+    return newUnit;
+  },
+  
+  updateBloodUnit: async (id: string, unitData: Partial<BloodUnit>) => {
+    await new Promise(resolve => setTimeout(resolve, 450));
+    
+    const index = mockBloodUnits.findIndex(unit => unit.id === id);
+    if (index === -1) throw new Error('Blood unit not found');
+    
+    mockBloodUnits[index] = { ...mockBloodUnits[index], ...unitData };
+    return mockBloodUnits[index];
+  },
+  
+  deleteBloodUnit: async (id: string) => {
+    await new Promise(resolve => setTimeout(resolve, 600));
+    
+    const index = mockBloodUnits.findIndex(unit => unit.id === id);
+    if (index === -1) throw new Error('Blood unit not found');
+    
+    mockBloodUnits.splice(index, 1);
+    return { success: true };
   }
 };

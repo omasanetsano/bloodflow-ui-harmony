@@ -1,3 +1,4 @@
+
 export type BloodType = 'A+' | 'A-' | 'B+' | 'B-' | 'AB+' | 'AB-' | 'O+' | 'O-';
 
 export interface Donor {
@@ -54,4 +55,20 @@ export interface DonationRecord {
   hemoglobin?: number;
   notes?: string;
   status: 'Processing' | 'Available' | 'Discarded';
+}
+
+// Add missing types
+export interface BloodCollection {
+  id: string;
+  date: Date;
+  donorId: string;
+  quantity: number;
+  bloodType: BloodType;
+  status: 'Processing' | 'Available' | 'Discarded';
+}
+
+export interface InventoryItem {
+  bloodType: BloodType;
+  available: number;
+  total: number;
 }
