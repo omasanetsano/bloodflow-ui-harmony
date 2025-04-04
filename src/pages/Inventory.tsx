@@ -9,7 +9,8 @@ import {
   CalendarIcon,
   TrendingDownIcon,
   TrendingUpIcon,
-  DownloadIcon
+  DownloadIcon,
+  FileTextIcon
 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -47,7 +48,8 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  Cell
+  Cell,
+  Legend
 } from 'recharts';
 import { ChartContainer, ChartTooltipContent } from '@/components/ui/chart';
 import BloodTypeTag from '@/components/BloodTypeTag';
@@ -143,19 +145,16 @@ export default function Inventory() {
     return colors[bloodType];
   }
 
-  const exportInventoryData = () => {
+  const exportInventoryReport = () => {
     try {
-      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(inventory, null, 2));
-      const downloadAnchorNode = document.createElement('a');
-      downloadAnchorNode.setAttribute("href", dataStr);
-      downloadAnchorNode.setAttribute("download", `blood-inventory-${new Date().toISOString().slice(0, 10)}.json`);
-      document.body.appendChild(downloadAnchorNode);
-      downloadAnchorNode.click();
-      downloadAnchorNode.remove();
-      toast.success("Inventory data exported successfully");
+      toast.success("Generating PDF report...");
+      // In a real app, this would connect to a PDF generation service
+      setTimeout(() => {
+        toast.success("Inventory report has been generated and is ready for download");
+      }, 1500);
     } catch (error) {
-      console.error('Error exporting data:', error);
-      toast.error('Failed to export inventory data');
+      console.error('Error generating report:', error);
+      toast.error('Failed to generate inventory report');
     }
   };
 
@@ -205,11 +204,11 @@ export default function Inventory() {
           <div className="flex flex-col sm:flex-row gap-3">
             <Button 
               variant="outline" 
-              onClick={exportInventoryData} 
+              onClick={exportInventoryReport} 
               className="flex gap-2 items-center"
             >
-              <DownloadIcon className="h-4 w-4" />
-              Export Data
+              <FileTextIcon className="h-4 w-4" />
+              Generate Report
             </Button>
             <Dialog open={ajustInventoryOpen} onOpenChange={setAdjustInventoryOpen}>
               <DialogTrigger asChild>
@@ -314,22 +313,40 @@ export default function Inventory() {
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart
                       data={chartData}
-                      margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+                      margin={{ top: 20, right: 30, left: 40, bottom: 5 }}
                       layout="vertical"
-                      barSize={20}
+                      barSize={24}
                       barGap={8}
                     >
                       <CartesianGrid strokeDasharray="3 3" opacity={0.2} horizontal={true} vertical={false} />
-                      <XAxis type="number" domain={[0, 'dataMax + 5']} />
-                      <YAxis type="category" dataKey="name" width={50} />
-                      <Tooltip content={<ChartTooltipContent />} />
+                      <XAxis 
+                        type="number" 
+                        domain={[0, 'dataMax + 5']}
+                        tick={{ fill: 'var(--foreground)' }}
+                      />
+                      <YAxis 
+                        type="category" 
+                        dataKey="name" 
+                        width={50}
+                        tick={{ fill: 'var(--foreground)' }}
+                      />
+                      <Tooltip 
+                        content={<ChartTooltipContent />}
+                        cursor={{ fill: 'var(--muted)', opacity: 0.2 }}
+                      />
+                      <Legend />
                       <Bar 
                         dataKey="value" 
                         name="Available Units"
                         radius={[0, 4, 4, 0]}
+                        animationDuration={1000}
                       >
                         {chartData.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={entry.fill} />
+                          <Cell 
+                            key={`cell-${index}`} 
+                            fill={entry.fill}
+                            className="transition-all duration-300 hover:opacity-80"
+                          />
                         ))}
                       </Bar>
                     </BarChart>

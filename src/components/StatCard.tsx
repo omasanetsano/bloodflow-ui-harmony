@@ -1,56 +1,59 @@
 
+import { ReactNode } from 'react';
+import { Card, CardContent } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
+import { TrendingUpIcon, TrendingDownIcon } from 'lucide-react';
 
 interface StatCardProps {
   title: string;
-  value: string | number;
+  value: number | string;
+  icon?: ReactNode;
   description?: string;
-  icon?: React.ReactNode;
-  className?: string;
   trend?: 'up' | 'down' | 'neutral';
   trendValue?: string;
+  className?: string;
+  valueClassName?: string;
 }
 
 export default function StatCard({ 
   title, 
   value, 
-  description,
   icon, 
+  description, 
+  trend, 
+  trendValue,
   className,
-  trend,
-  trendValue
+  valueClassName
 }: StatCardProps) {
   return (
-    <div className={cn(
-      'bg-card rounded-lg shadow-sm p-6 border border-border transition-all duration-300 hover:shadow-md',
-      className
-    )}>
-      <div className="flex items-center justify-between">
-        <div>
+    <Card className={cn("overflow-hidden", className)}>
+      <CardContent className="p-6">
+        <div className="flex items-center justify-between">
           <p className="text-sm font-medium text-muted-foreground">{title}</p>
-          <p className="mt-1 text-3xl font-semibold text-foreground">{value}</p>
-          {description && (
-            <p className="mt-1 text-sm text-muted-foreground">{description}</p>
-          )}
-          {trend && trendValue && (
-            <div className="mt-2 flex items-center text-sm">
-              <span className={cn(
-                'inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium',
-                trend === 'up' ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' : 
-                trend === 'down' ? 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400' : 
-                'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300'
-              )}>
-                {trend === 'up' ? '↑' : trend === 'down' ? '↓' : '•'} {trendValue}
-              </span>
-            </div>
-          )}
+          {icon && <div className="h-8 w-8 rounded-full bg-secondary flex items-center justify-center">{icon}</div>}
         </div>
-        {icon && (
-          <div className="p-3 bg-bloodRed-50 dark:bg-bloodRed-950/30 rounded-full">
-            {icon}
+        <div className="mt-2">
+          <p className={cn("text-2xl font-bold", valueClassName || "text-foreground")}>{value}</p>
+          {description && <p className="text-xs text-muted-foreground mt-1">{description}</p>}
+        </div>
+        {trend && trendValue && (
+          <div className="mt-3 flex items-center gap-1">
+            {trend === 'up' ? (
+              <>
+                <TrendingUpIcon className="h-3 w-3 text-green-500" />
+                <span className="text-xs font-medium text-green-500">{trendValue}</span>
+              </>
+            ) : trend === 'down' ? (
+              <>
+                <TrendingDownIcon className="h-3 w-3 text-red-500" />
+                <span className="text-xs font-medium text-red-500">{trendValue}</span>
+              </>
+            ) : (
+              <span className="text-xs text-muted-foreground">{trendValue}</span>
+            )}
           </div>
         )}
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 }

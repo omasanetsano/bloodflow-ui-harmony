@@ -9,7 +9,8 @@ import {
   GlobeIcon, 
   PaletteIcon,
   SaveIcon,
-  ServerIcon
+  ServerIcon,
+  BuildingIcon
 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -26,6 +27,8 @@ import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useTheme } from '@/providers/ThemeProvider';
 import { HOSPITAL_NAME } from './Dashboard';
+import { APP_NAME } from '@/lib/constants';
+import Logo from '@/components/Logo';
 
 export default function Settings() {
   const { theme, setTheme } = useTheme();
@@ -38,6 +41,7 @@ export default function Settings() {
   const [temperatureUnit, setTemperatureUnit] = useState('celsius');
   
   const handleSaveSettings = () => {
+    // In a real app, this would persist settings to a backend
     toast.success('Settings saved successfully');
   };
 
@@ -49,14 +53,14 @@ export default function Settings() {
     setLanguage('en');
     setDateFormat('MM/DD/YYYY');
     setTemperatureUnit('celsius');
-    setTheme('light');
+    setTheme('system');
     toast.success('Settings reset to defaults');
   };
 
   return (
     <>
       <Helmet>
-        <title>Settings | {HOSPITAL_NAME} Blood Bank</title>
+        <title>Settings | {hospitalName} Blood Bank</title>
       </Helmet>
       <div className="flex flex-col gap-8">
         <div>
@@ -66,7 +70,14 @@ export default function Settings() {
           </p>
         </div>
 
-        <Tabs defaultValue="general">
+        <div className="text-center p-4 rounded-lg border bg-card/50 backdrop-blur-sm">
+          <Logo size="lg" appNameOnly={true} className="mx-auto mb-3" />
+          <p className="text-sm text-muted-foreground">
+            {APP_NAME} Blood Bank Management System v1.0
+          </p>
+        </div>
+
+        <Tabs defaultValue="general" className="animate-fade-in transition-all duration-300">
           <TabsList className="mb-6">
             <TabsTrigger value="general">
               <Settings2Icon className="h-4 w-4 mr-2" />
@@ -88,18 +99,22 @@ export default function Settings() {
           
           {/* General Settings */}
           <TabsContent value="general">
-            <Card className="bg-gradient-to-br from-card to-secondary/20 backdrop-blur-sm">
+            <Card className="bg-gradient-to-br from-card to-secondary/20 backdrop-blur-sm transition-all duration-300 hover:shadow-md">
               <CardHeader>
-                <CardTitle>General Settings</CardTitle>
-                <CardDescription>Manage basic system configuration</CardDescription>
+                <CardTitle className="flex items-center gap-2">
+                  <BuildingIcon className="h-5 w-5 text-muted-foreground" />
+                  Organization Settings
+                </CardTitle>
+                <CardDescription>Configure your organization information</CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">Hospital Name</label>
+                  <label className="text-sm font-medium">Hospital/Organization Name</label>
                   <Input 
                     value={hospitalName} 
                     onChange={(e) => setHospitalName(e.target.value)} 
                     placeholder="Enter hospital name"
+                    className="transition-all duration-300"
                   />
                   <p className="text-xs text-muted-foreground">
                     This name will appear throughout the application and on reports
@@ -109,7 +124,7 @@ export default function Settings() {
                 <div className="space-y-2">
                   <label className="text-sm font-medium">Language</label>
                   <Select value={language} onValueChange={setLanguage}>
-                    <SelectTrigger>
+                    <SelectTrigger className="transition-all duration-300">
                       <GlobeIcon className="h-4 w-4 mr-2" />
                       <SelectValue placeholder="Select language" />
                     </SelectTrigger>
@@ -125,7 +140,7 @@ export default function Settings() {
                 <div className="space-y-2">
                   <label className="text-sm font-medium">Date Format</label>
                   <Select value={dateFormat} onValueChange={setDateFormat}>
-                    <SelectTrigger>
+                    <SelectTrigger className="transition-all duration-300">
                       <SelectValue placeholder="Select date format" />
                     </SelectTrigger>
                     <SelectContent>
@@ -331,10 +346,13 @@ export default function Settings() {
         </Tabs>
         
         <div className="flex justify-end gap-4">
-          <Button variant="outline" onClick={handleResetSettings}>
+          <Button variant="outline" onClick={handleResetSettings} className="transition-all duration-300">
             Reset to Defaults
           </Button>
-          <Button onClick={handleSaveSettings} className="bg-bloodRed-500 hover:bg-bloodRed-600 text-white">
+          <Button 
+            onClick={handleSaveSettings} 
+            className="bg-bloodRed-500 hover:bg-bloodRed-600 text-white transition-all duration-300"
+          >
             <SaveIcon className="h-4 w-4 mr-2" />
             Save Settings
           </Button>

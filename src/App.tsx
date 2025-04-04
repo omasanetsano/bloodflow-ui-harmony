@@ -15,6 +15,7 @@ import BloodRequests from "@/pages/BloodRequests";
 import Inventory from "@/pages/Inventory";
 import Settings from "@/pages/Settings";
 import { HOSPITAL_NAME } from "@/pages/Dashboard";
+import { APP_NAME } from "@/lib/constants";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -31,10 +32,10 @@ const App = () => (
       <BrowserRouter>
         <TooltipProvider>
           <Helmet
-            titleTemplate={`%s | ${HOSPITAL_NAME} Blood Bank`}
-            defaultTitle={`${HOSPITAL_NAME} Blood Bank Management System`}
+            titleTemplate={`%s | ${HOSPITAL_NAME} - ${APP_NAME}`}
+            defaultTitle={`${APP_NAME} | ${HOSPITAL_NAME} Blood Bank Management System`}
           >
-            <meta name="description" content={`${HOSPITAL_NAME} Blood Bank Management System - Manage donors, blood collection, inventory and requests`} />
+            <meta name="description" content={`${APP_NAME} - Advanced Blood Bank Management System for ${HOSPITAL_NAME}`} />
             <meta name="theme-color" content="#E52222" />
           </Helmet>
           <Toaster />

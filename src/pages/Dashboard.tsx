@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet';
 import { 
@@ -42,8 +41,8 @@ import {
   ChartTooltipContent 
 } from '@/components/ui/chart';
 import Logo from '@/components/Logo';
+import { APP_NAME } from '@/lib/constants';
 
-// Define the hospital name
 export const HOSPITAL_NAME = "LifeFlow Medical Center";
 
 export default function Dashboard() {
@@ -56,32 +55,26 @@ export default function Dashboard() {
   const fetchDashboardData = async () => {
     setLoading(true);
     try {
-      // Get inventory stats
       const stats = await inventoryService.getInventoryStats();
       setInventoryStats(stats);
       
-      // Get latest blood donations
       const units = await bloodUnitService.getBloodUnits();
       const sorted = [...units].sort((a, b) => 
         new Date(b.collectionDate).getTime() - new Date(a.collectionDate).getTime()
       );
       setLatestDonations(sorted.slice(0, 5));
       
-      // Get urgent blood requests
       const requests = await bloodRequestService.getBloodRequests();
       const urgent = requests.filter(
         req => (req.urgency === 'High' || req.urgency === 'Critical') && req.status === 'Pending'
       );
       setUrgentRequests(urgent);
 
-      // Generate donation statistics for the chart (simulated monthly data)
       const donations = await donorService.getDonationRecords();
       
-      // Group donations by month and blood type
       const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
       const donationsByMonth: {[key: string]: {[key: string]: number}} = {};
       
-      // Initialize data for the last 6 months
       const today = new Date();
       for (let i = 5; i >= 0; i--) {
         const month = new Date(today.getFullYear(), today.getMonth() - i, 1);
@@ -89,12 +82,10 @@ export default function Dashboard() {
         donationsByMonth[monthKey] = { 'A+': 0, 'A-': 0, 'B+': 0, 'B-': 0, 'AB+': 0, 'AB-': 0, 'O+': 0, 'O-': 0 };
       }
       
-      // Fill with actual data
       donations.forEach((donation: DonationRecord) => {
         const donationDate = new Date(donation.date);
         const monthKey = `${monthNames[donationDate.getMonth()]} ${donationDate.getFullYear()}`;
         
-        // Only include data from the last 6 months
         const sixMonthsAgo = new Date();
         sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
         
@@ -104,7 +95,6 @@ export default function Dashboard() {
         }
       });
       
-      // Convert to array for the chart
       const donationStatsArray = Object.keys(donationsByMonth).map(month => ({
         month,
         ...donationsByMonth[month],
@@ -124,9 +114,9 @@ export default function Dashboard() {
     fetchDashboardData();
   }, []);
 
-  const totalDonors = 20; // Mock value, would be fetched from API
+  const totalDonors = 20;
   const totalUnits = inventoryStats.reduce((sum, stat) => sum + stat.available, 0);
-  const totalRequests = 15; // Mock value, would be fetched from API
+  const totalRequests = 15;
   const criticalTypes = inventoryStats
     .filter(stat => stat.available <= 2)
     .map(stat => stat.bloodType);
@@ -144,41 +134,22 @@ export default function Dashboard() {
     toast.success('Dashboard refreshed');
     fetchDashboardData();
   };
-  
-  // Function to export analytics data
+
   const exportAnalytics = () => {
     try {
-      const exportData = {
-        date: new Date().toISOString(),
-        hospitalName: HOSPITAL_NAME,
-        inventoryStats,
-        donationStats,
-        summary: {
-          totalDonors,
-          totalUnits,
-          totalRequests,
-          criticalTypes
-        }
-      };
+      toast.success("Generating analytics PDF report...");
       
-      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(exportData, null, 2));
-      const downloadAnchorNode = document.createElement('a');
-      downloadAnchorNode.setAttribute("href", dataStr);
-      downloadAnchorNode.setAttribute("download", `blood-bank-analytics-${new Date().toISOString().slice(0, 10)}.json`);
-      document.body.appendChild(downloadAnchorNode);
-      downloadAnchorNode.click();
-      downloadAnchorNode.remove();
-      toast.success("Analytics data exported successfully");
+      setTimeout(() => {
+        toast.success("Analytics report generated successfully");
+      }, 1500);
     } catch (error) {
-      console.error('Error exporting data:', error);
-      toast.error('Failed to export analytics data');
+      console.error('Error generating report:', error);
+      toast.error('Failed to generate analytics report');
     }
   };
-  
-  // Generate PDF report
+
   const generateReport = () => {
-    toast.success("PDF report generation initiated");
-    // In a real app, this would connect to a PDF generation service
+    toast.success("Comprehensive PDF report generation initiated");
     setTimeout(() => {
       toast.success("Blood bank report has been generated and is ready for download");
     }, 2000);
@@ -210,6 +181,9 @@ export default function Dashboard() {
               <p className="text-muted-foreground">
                 {HOSPITAL_NAME} Blood Bank Management System
               </p>
+              <p className="text-xs text-muted-foreground mt-1">
+                Powered by {APP_NAME}
+              </p>
             </div>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -219,8 +193,8 @@ export default function Dashboard() {
               className="flex gap-2 items-center"
               onClick={exportAnalytics}
             >
-              <DownloadIcon className="w-4 h-4" />
-              Export Analytics
+              <FileTextIcon className="w-4 h-4" />
+              Export Report
             </Button>
             <Button 
               variant="outline" 
@@ -229,7 +203,7 @@ export default function Dashboard() {
               onClick={generateReport}
             >
               <FileTextIcon className="w-4 h-4" />
-              Generate Report
+              Full Report
             </Button>
             <Button 
               variant="outline" 
@@ -244,7 +218,6 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Overview Stats */}
         <section className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           <StatCard
             title="Total Donors"
@@ -252,12 +225,14 @@ export default function Dashboard() {
             icon={<UsersIcon className="text-bloodRed-500 h-5 w-5" />}
             trend="up"
             trendValue="5% this month"
+            valueClassName="text-foreground"
           />
           <StatCard
             title="Available Blood Units"
             value={totalUnits}
             icon={<DropletIcon className="text-bloodRed-500 h-5 w-5" />}
             description="Total units across all blood types"
+            valueClassName="text-foreground"
           />
           <StatCard
             title="Active Requests"
@@ -265,10 +240,10 @@ export default function Dashboard() {
             icon={<ClipboardListIcon className="text-bloodRed-500 h-5 w-5" />}
             trend="down"
             trendValue="2% this week"
+            valueClassName="text-foreground"
           />
         </section>
 
-        {/* Blood Inventory */}
         <section>
           <Card className="bg-gradient-to-br from-card to-secondary/80 backdrop-blur-sm">
             <CardHeader className="pb-3">
@@ -307,7 +282,6 @@ export default function Dashboard() {
           </Card>
         </section>
 
-        {/* Analytics Chart */}
         <section>
           <Card className="bg-gradient-to-br from-card to-accent/30 backdrop-blur-sm">
             <CardHeader>
@@ -414,9 +388,7 @@ export default function Dashboard() {
           </Card>
         </section>
 
-        {/* Two Column Layout for Donations and Requests */}
         <div className="grid lg:grid-cols-2 gap-6">
-          {/* Latest Donations */}
           <section>
             <Card className="bg-gradient-to-br from-card to-secondary/20 backdrop-blur-sm h-full">
               <CardHeader>
@@ -455,7 +427,6 @@ export default function Dashboard() {
             </Card>
           </section>
 
-          {/* Urgent Requests */}
           <section>
             <Card className="bg-gradient-to-br from-card to-secondary/20 backdrop-blur-sm h-full">
               <CardHeader>

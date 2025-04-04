@@ -10,13 +10,13 @@ interface LayoutProps {
 
 export default function Layout({ children }: LayoutProps) {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background to-secondary/5 dark:from-background dark:to-black/20">
+    <div className="min-h-screen bg-gradient-to-br from-background to-secondary/5 dark:from-background dark:to-black/20 transition-colors duration-500">
       <Sidebar />
       <div className="lg:pl-64">
-        <header className="fixed top-0 right-0 left-0 lg:left-64 h-16 z-20 backdrop-blur-md bg-background/80 border-b border-border flex items-center px-6 transition-all">
+        <header className="fixed top-0 right-0 left-0 lg:left-64 h-16 z-20 backdrop-blur-md bg-background/80 border-b border-border flex items-center px-6 transition-all animate-fade-in">
           <div className="w-full flex justify-between items-center">
             <div className="lg:hidden">
-              <Logo size="sm" />
+              <Logo size="sm" appNameOnly={true} />
             </div>
             <div className="ml-auto">
               <ThemeToggle />
