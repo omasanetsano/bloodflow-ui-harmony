@@ -13,7 +13,6 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import { ThemeToggle } from '@/components/ThemeToggle';
 import Logo from '@/components/Logo';
 import { APP_NAME } from '@/lib/constants';
 
@@ -58,7 +57,6 @@ export default function Sidebar() {
             <Logo size="md" />
             <span className="font-bold text-xl text-foreground">{APP_NAME}</span>
           </div>
-          <ThemeToggle />
         </div>
         
         <div className="flex-1 py-6 px-4 space-y-1 overflow-y-auto">
@@ -111,7 +109,6 @@ export default function Sidebar() {
               <Logo size="md" />
               <span className="font-bold text-xl text-foreground">{APP_NAME}</span>
             </div>
-            <ThemeToggle />
           </div>
           
           <div className="flex-1 py-6 px-4 space-y-1 overflow-y-auto">
