@@ -10,10 +10,9 @@ import {
   CalendarIcon,
   TrendingDownIcon,
   TrendingUpIcon,
-  DownloadIcon,
   FileTextIcon
 } from 'lucide-react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import {
   Table,
@@ -52,7 +51,11 @@ import {
   Cell,
   Legend
 } from 'recharts';
-import { ChartContainer, ChartTooltipContent } from '@/components/ui/chart';
+import { 
+  ChartContainer, 
+  ChartTooltipContent,
+  ChartTooltip
+} from '@/components/ui/chart';
 import BloodTypeTag from '@/components/BloodTypeTag';
 import { HOSPITAL_NAME } from './Dashboard';
 import { inventoryService, bloodUnitService } from '@/lib/mockData';
@@ -392,8 +395,8 @@ export default function Inventory() {
               <CardDescription>Current blood levels by type</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="h-[300px] w-full">
-                <ChartContainer config={{}}>
+              <div className="w-full h-[300px] relative">
+                <ChartContainer config={{}} className="w-full h-full">
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart
                       data={chartData}
@@ -414,7 +417,7 @@ export default function Inventory() {
                         width={50}
                         tick={{ fill: 'var(--foreground)' }}
                       />
-                      <Tooltip 
+                      <ChartTooltip 
                         content={<ChartTooltipContent />}
                         cursor={{ fill: 'var(--muted)', opacity: 0.2 }}
                       />
