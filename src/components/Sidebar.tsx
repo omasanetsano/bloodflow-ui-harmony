@@ -14,6 +14,8 @@ import {
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/ThemeToggle';
+import Logo from '@/components/Logo';
+import { APP_NAME } from '@/lib/constants';
 
 type NavItem = {
   name: string;
@@ -53,8 +55,8 @@ export default function Sidebar() {
       <div className="hidden lg:flex lg:flex-col h-screen w-64 bg-card border-r border-border fixed inset-y-0 left-0 z-20">
         <div className="p-4 flex items-center justify-between border-b border-border">
           <div className="flex items-center gap-2">
-            <DropletIcon className="h-6 w-6 text-bloodRed-500" />
-            <span className="font-bold text-xl text-foreground">Blood Bank</span>
+            <Logo size="md" />
+            <span className="font-bold text-xl text-foreground">{APP_NAME}</span>
           </div>
           <ThemeToggle />
         </div>
@@ -106,8 +108,8 @@ export default function Sidebar() {
         )}>
           <div className="p-4 flex items-center justify-between border-b border-border">
             <div className="flex items-center gap-2">
-              <DropletIcon className="h-6 w-6 text-bloodRed-500" />
-              <span className="font-bold text-xl text-foreground">Blood Bank</span>
+              <Logo size="md" />
+              <span className="font-bold text-xl text-foreground">{APP_NAME}</span>
             </div>
             <ThemeToggle />
           </div>

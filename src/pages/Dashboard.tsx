@@ -139,9 +139,45 @@ export default function Dashboard() {
     try {
       toast.success("Generating analytics PDF report...");
       
+      const { jsPDF } = require("jspdf");
+      const doc = new jsPDF();
+      
+      doc.setFontSize(18);
+      doc.text(`${HOSPITAL_NAME} - Blood Bank Analytics`, 14, 20);
+      doc.setFontSize(12);
+      doc.text(`Generated on ${new Date().toLocaleDateString()}`, 14, 30);
+      
+      doc.setFontSize(14);
+      doc.text("Current Blood Inventory", 14, 45);
+      doc.setFontSize(10);
+      let yPos = 55;
+      inventoryStats.forEach(stat => {
+        doc.text(`${stat.bloodType}: ${stat.available} units (${stat.reserved} reserved)`, 20, yPos);
+        yPos += 7;
+      });
+      
+      doc.setFontSize(14);
+      doc.text("Blood Donation Summary", 14, yPos + 10);
+      doc.setFontSize(10);
+      yPos += 20;
+      if (donationStats.length > 0) {
+        const lastMonthData = donationStats[donationStats.length - 1];
+        doc.text(`Latest Month (${lastMonthData.month})`, 20, yPos);
+        yPos += 7;
+        Object.entries(lastMonthData)
+          .filter(([key]) => key !== 'month' && key !== 'total')
+          .forEach(([type, count]) => {
+            doc.text(`${type}: ${count} donations`, 25, yPos);
+            yPos += 7;
+          });
+        doc.text(`Total: ${lastMonthData.total} donations`, 20, yPos + 3);
+      }
+      
+      doc.save(`${HOSPITAL_NAME.replace(/\s+/g, '_')}_blood_bank_report.pdf`);
+      
       setTimeout(() => {
         toast.success("Analytics report generated successfully");
-      }, 1500);
+      }, 500);
     } catch (error) {
       console.error('Error generating report:', error);
       toast.error('Failed to generate analytics report');
@@ -150,9 +186,74 @@ export default function Dashboard() {
 
   const generateReport = () => {
     toast.success("Comprehensive PDF report generation initiated");
-    setTimeout(() => {
-      toast.success("Blood bank report has been generated and is ready for download");
-    }, 2000);
+    
+    try {
+      const { jsPDF } = require("jspdf");
+      const doc = new jsPDF();
+      
+      doc.setFontSize(22);
+      doc.text(`${APP_NAME}`, 105, 20, { align: 'center' });
+      doc.setFontSize(16);
+      doc.text(`${HOSPITAL_NAME} - Comprehensive Blood Bank Report`, 105, 30, { align: 'center' });
+      doc.setFontSize(10);
+      doc.text(`Generated on ${new Date().toLocaleDateString()} at ${new Date().toLocaleTimeString()}`, 105, 40, { align: 'center' });
+      
+      doc.setFontSize(14);
+      doc.text("Executive Summary", 14, 55);
+      doc.setFontSize(10);
+      doc.text(`Total Donors: ${totalDonors}`, 20, 65);
+      doc.text(`Available Blood Units: ${totalUnits}`, 20, 72);
+      doc.text(`Active Requests: ${totalRequests}`, 20, 79);
+      
+      doc.setFontSize(14);
+      doc.text("Blood Inventory Status", 14, 95);
+      doc.setFontSize(10);
+      let yPos = 105;
+      inventoryStats.forEach(stat => {
+        doc.text(`${stat.bloodType}: ${stat.available} units (${stat.reserved} reserved)`, 20, yPos);
+        yPos += 7;
+      });
+      
+      if (criticalTypes.length > 0) {
+        doc.setTextColor(255, 0, 0);
+        doc.text(`Critical Alert: Low stock for ${criticalTypes.join(', ')}`, 20, yPos + 5);
+        doc.setTextColor(0, 0, 0);
+        yPos += 15;
+      } else {
+        yPos += 5;
+      }
+      
+      doc.setFontSize(14);
+      doc.text("Recent Blood Donations", 14, yPos + 5);
+      doc.setFontSize(10);
+      yPos += 15;
+      latestDonations.forEach(unit => {
+        doc.text(`${formatDate(unit.collectionDate)} - ${unit.donorName} (${unit.bloodType}) - ${unit.quantity} ml - ${unit.status}`, 20, yPos);
+        yPos += 7;
+      });
+      
+      doc.setFontSize(14);
+      doc.text("Urgent Blood Requests", 14, yPos);
+      doc.setFontSize(10);
+      yPos += 10;
+      if (urgentRequests.length > 0) {
+        urgentRequests.forEach(request => {
+          doc.text(`${formatDate(request.requestDate)} - Patient: ${request.patientName} - ${request.bloodType} - ${request.quantity} ml - ${request.urgency}`, 20, yPos);
+          yPos += 7;
+        });
+      } else {
+        doc.text("No urgent requests at this time", 20, yPos);
+      }
+      
+      doc.save(`${HOSPITAL_NAME.replace(/\s+/g, '_')}_comprehensive_report.pdf`);
+      
+      setTimeout(() => {
+        toast.success("Blood bank report has been generated and is ready for download");
+      }, 500);
+    } catch (error) {
+      console.error('Error generating comprehensive report:', error);
+      toast.error('Failed to generate comprehensive report');
+    }
   };
 
   const chartConfig = {
