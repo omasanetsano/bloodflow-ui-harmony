@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet';
 import { 
@@ -56,6 +57,7 @@ import BloodTypeTag from '@/components/BloodTypeTag';
 import { HOSPITAL_NAME } from './Dashboard';
 import { inventoryService, bloodUnitService } from '@/lib/mockData';
 import { InventoryItem, BloodType, BloodUnit } from '@/lib/types';
+import { jsPDF } from 'jspdf';
 
 export default function Inventory() {
   const [inventory, setInventory] = useState<InventoryItem[]>([]);
@@ -148,10 +150,92 @@ export default function Inventory() {
   const exportInventoryReport = () => {
     try {
       toast.success("Generating PDF report...");
-      // In a real app, this would connect to a PDF generation service
-      setTimeout(() => {
-        toast.success("Inventory report has been generated and is ready for download");
-      }, 1500);
+      
+      // Create new jsPDF instance
+      const doc = new jsPDF();
+      
+      // Add title
+      doc.setFontSize(18);
+      doc.text("Blood Inventory Report", 15, 20);
+      
+      // Add timestamp
+      const now = new Date();
+      doc.setFontSize(10);
+      doc.text(`Generated on ${now.toLocaleDateString()} at ${now.toLocaleTimeString()}`, 15, 30);
+      
+      // Add hospital name
+      doc.setFontSize(12);
+      doc.text(`${HOSPITAL_NAME} Blood Bank`, 15, 40);
+      
+      // Add inventory section
+      doc.setFontSize(14);
+      doc.text("Current Inventory Levels", 15, 55);
+      
+      // Create a table for inventory data
+      let yPos = 65;
+      doc.setFontSize(10);
+      doc.text("Blood Type", 15, yPos);
+      doc.text("Available Units", 60, yPos);
+      doc.text("Total Capacity", 110, yPos);
+      doc.text("Status", 160, yPos);
+      
+      yPos += 5;
+      doc.line(15, yPos, 195, yPos);
+      yPos += 10;
+      
+      // Add inventory data rows
+      filteredInventory.forEach(item => {
+        const percentUsed = Math.floor((item.available / item.total) * 100);
+        let statusText = "Adequate";
+        
+        if (percentUsed <= 15) {
+          statusText = "Critical";
+        } else if (percentUsed <= 30) {
+          statusText = "Low";
+        }
+        
+        doc.text(item.bloodType, 15, yPos);
+        doc.text(item.available.toString(), 60, yPos);
+        doc.text(item.total.toString(), 110, yPos);
+        doc.text(statusText, 160, yPos);
+        
+        yPos += 10;
+      });
+      
+      // Add expiring units section if available
+      if (expiringUnits.length > 0) {
+        yPos += 10;
+        doc.setFontSize(14);
+        doc.text("Units Expiring Soon", 15, yPos);
+        yPos += 10;
+        
+        doc.setFontSize(10);
+        doc.text("Unit ID", 15, yPos);
+        doc.text("Blood Type", 60, yPos);
+        doc.text("Expiry Date", 110, yPos);
+        doc.text("Days Left", 160, yPos);
+        
+        yPos += 5;
+        doc.line(15, yPos, 195, yPos);
+        yPos += 10;
+        
+        // Add expiring units data
+        expiringUnits.slice(0, 5).forEach(unit => {
+          const days = daysUntilExpiry(unit.expiryDate);
+          
+          doc.text(unit.id, 15, yPos);
+          doc.text(unit.bloodType, 60, yPos);
+          doc.text(formatDate(unit.expiryDate), 110, yPos);
+          doc.text(days.toString(), 160, yPos);
+          
+          yPos += 10;
+        });
+      }
+      
+      // Save and trigger download
+      doc.save("InventoryReport.pdf");
+      
+      toast.success("Inventory report downloaded successfully");
     } catch (error) {
       console.error('Error generating report:', error);
       toast.error('Failed to generate inventory report');

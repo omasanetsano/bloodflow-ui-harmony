@@ -42,6 +42,7 @@ import {
 } from '@/components/ui/chart';
 import Logo from '@/components/Logo';
 import { APP_NAME } from '@/lib/constants';
+import { jsPDF } from 'jspdf';
 
 export const HOSPITAL_NAME = "LifeFlow Medical Center";
 
@@ -139,7 +140,6 @@ export default function Dashboard() {
     try {
       toast.success("Generating analytics PDF report...");
       
-      const { jsPDF } = require("jspdf");
       const doc = new jsPDF();
       
       doc.setFontSize(18);
@@ -173,11 +173,9 @@ export default function Dashboard() {
         doc.text(`Total: ${lastMonthData.total} donations`, 20, yPos + 3);
       }
       
-      doc.save(`${HOSPITAL_NAME.replace(/\s+/g, '_')}_blood_bank_report.pdf`);
+      doc.save(`${HOSPITAL_NAME.replace(/\s+/g, '_')}_analytics_report.pdf`);
       
-      setTimeout(() => {
-        toast.success("Analytics report generated successfully");
-      }, 500);
+      toast.success("Analytics report downloaded successfully");
     } catch (error) {
       console.error('Error generating report:', error);
       toast.error('Failed to generate analytics report');
@@ -185,10 +183,9 @@ export default function Dashboard() {
   };
 
   const generateReport = () => {
-    toast.success("Comprehensive PDF report generation initiated");
-    
     try {
-      const { jsPDF } = require("jspdf");
+      toast.success("Comprehensive PDF report generation initiated");
+      
       const doc = new jsPDF();
       
       doc.setFontSize(22);
@@ -233,9 +230,9 @@ export default function Dashboard() {
       });
       
       doc.setFontSize(14);
-      doc.text("Urgent Blood Requests", 14, yPos);
+      doc.text("Urgent Blood Requests", 14, yPos + 10);
       doc.setFontSize(10);
-      yPos += 10;
+      yPos += 20;
       if (urgentRequests.length > 0) {
         urgentRequests.forEach(request => {
           doc.text(`${formatDate(request.requestDate)} - Patient: ${request.patientName} - ${request.bloodType} - ${request.quantity} ml - ${request.urgency}`, 20, yPos);
@@ -247,9 +244,7 @@ export default function Dashboard() {
       
       doc.save(`${HOSPITAL_NAME.replace(/\s+/g, '_')}_comprehensive_report.pdf`);
       
-      setTimeout(() => {
-        toast.success("Blood bank report has been generated and is ready for download");
-      }, 500);
+      toast.success("Comprehensive report downloaded successfully");
     } catch (error) {
       console.error('Error generating comprehensive report:', error);
       toast.error('Failed to generate comprehensive report');
