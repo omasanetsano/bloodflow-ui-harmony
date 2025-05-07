@@ -2,7 +2,7 @@
 import { Helmet } from 'react-helmet';
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "@/providers/ThemeProvider";
@@ -14,8 +14,6 @@ import BloodCollection from "@/pages/BloodCollection";
 import BloodRequests from "@/pages/BloodRequests";
 import Inventory from "@/pages/Inventory";
 import Settings from "@/pages/Settings";
-import Login from "@/pages/Login";
-import Register from "@/pages/Register";
 import { HOSPITAL_NAME } from "@/pages/Dashboard";
 import { APP_NAME } from "@/lib/constants";
 
@@ -27,20 +25,6 @@ const queryClient = new QueryClient({
     },
   },
 });
-
-// Simple auth check (will be replaced with Supabase auth later)
-const isAuthenticated = () => {
-  // This should be replaced with actual auth check using Supabase
-  return localStorage.getItem("isAuthenticated") === "true";
-};
-
-// Protected route component
-const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  if (!isAuthenticated()) {
-    return <Navigate to="/login" replace />;
-  }
-  return <>{children}</>;
-};
 
 const App = () => (
   <ThemeProvider defaultTheme="system">
@@ -57,69 +41,52 @@ const App = () => (
           <Toaster />
           <Sonner richColors position="top-right" />
           <Routes>
-            {/* Auth Routes */}
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            
-            {/* Protected Routes */}
             <Route 
               path="/" 
               element={
-                <ProtectedRoute>
-                  <Layout>
-                    <Index />
-                  </Layout>
-                </ProtectedRoute>
+                <Layout>
+                  <Index />
+                </Layout>
               } 
             />
             <Route 
               path="/donors" 
               element={
-                <ProtectedRoute>
-                  <Layout>
-                    <Donors />
-                  </Layout>
-                </ProtectedRoute>
+                <Layout>
+                  <Donors />
+                </Layout>
               } 
             />
             <Route 
               path="/collection" 
               element={
-                <ProtectedRoute>
-                  <Layout>
-                    <BloodCollection />
-                  </Layout>
-                </ProtectedRoute>
+                <Layout>
+                  <BloodCollection />
+                </Layout>
               } 
             />
             <Route 
               path="/requests" 
               element={
-                <ProtectedRoute>
-                  <Layout>
-                    <BloodRequests />
-                  </Layout>
-                </ProtectedRoute>
+                <Layout>
+                  <BloodRequests />
+                </Layout>
               } 
             />
             <Route 
               path="/inventory" 
               element={
-                <ProtectedRoute>
-                  <Layout>
-                    <Inventory />
-                  </Layout>
-                </ProtectedRoute>
+                <Layout>
+                  <Inventory />
+                </Layout>
               } 
             />
             <Route 
               path="/settings" 
               element={
-                <ProtectedRoute>
-                  <Layout>
-                    <Settings />
-                  </Layout>
-                </ProtectedRoute>
+                <Layout>
+                  <Settings />
+                </Layout>
               } 
             />
             <Route path="*" element={<NotFound />} />
