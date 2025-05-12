@@ -9,6 +9,11 @@ export interface Hospital {
   type: HospitalType;
 }
 
+export interface Admin {
+  name: string;
+  email: string;
+}
+
 // Mock function to simulate login
 export const login = (email: string, password: string): Promise<boolean> => {
   return new Promise((resolve) => {
@@ -17,7 +22,6 @@ export const login = (email: string, password: string): Promise<boolean> => {
       if (email && password) {
         localStorage.setItem("isAuthenticated", "true");
         localStorage.setItem("userEmail", email);
-        localStorage.setItem("userRole", "hospital");
         resolve(true);
       } else {
         resolve(false);
@@ -34,14 +38,20 @@ export const register = (data: any): Promise<boolean> => {
       localStorage.setItem("registrationData", JSON.stringify(data));
       localStorage.setItem("isAuthenticated", "true");
       localStorage.setItem("userEmail", data.email);
-      localStorage.setItem("userRole", "hospital");
       
       // Store hospital info
-      const hospitals = [{
+      const hospital = {
         name: data.hospitalName,
         type: data.hospitalType
-      }];
-      localStorage.setItem("managedHospitals", JSON.stringify(hospitals));
+      };
+      localStorage.setItem("hospital", JSON.stringify(hospital));
+      
+      // Store admin info
+      const admin = {
+        name: data.name,
+        email: data.email
+      };
+      localStorage.setItem("admin", JSON.stringify(admin));
       
       resolve(true);
     }, 800);
@@ -57,30 +67,40 @@ export const isAuthenticated = (): boolean => {
 export const logout = (): void => {
   localStorage.removeItem("isAuthenticated");
   localStorage.removeItem("userEmail");
-  localStorage.removeItem("userRole");
-  localStorage.removeItem("managedHospitals");
+  localStorage.removeItem("hospital");
+  localStorage.removeItem("admin");
+  localStorage.removeItem("registrationData");
   window.location.href = "/login";
 };
 
-// Get current user info
-export const getCurrentUser = () => {
+// Get current hospital info
+export const getHospitalInfo = (): Hospital | null => {
   if (!isAuthenticated()) return null;
   
-  const managedHospitals = localStorage.getItem("managedHospitals") 
-    ? JSON.parse(localStorage.getItem("managedHospitals") || "[]")
-    : [];
-    
-  return {
-    email: localStorage.getItem("userEmail") || "",
-    role: localStorage.getItem("userRole") || "hospital",
-    managedHospitals
-    // In a real app with Supabase, we would get more user data here
-  };
+  try {
+    const hospitalData = localStorage.getItem("hospital");
+    if (hospitalData) {
+      return JSON.parse(hospitalData);
+    }
+    return null;
+  } catch (error) {
+    console.error("Error parsing hospital data:", error);
+    return null;
+  }
 };
 
-// Get managed hospitals
-export const getManagedHospitals = (): Hospital[] => {
-  return localStorage.getItem("managedHospitals") 
-    ? JSON.parse(localStorage.getItem("managedHospitals") || "[]")
-    : [];
+// Get current admin info
+export const getAdminInfo = (): Admin | null => {
+  if (!isAuthenticated()) return null;
+  
+  try {
+    const adminData = localStorage.getItem("admin");
+    if (adminData) {
+      return JSON.parse(adminData);
+    }
+    return null;
+  } catch (error) {
+    console.error("Error parsing admin data:", error);
+    return null;
+  }
 };

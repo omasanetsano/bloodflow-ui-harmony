@@ -7,7 +7,6 @@ import {
   AlertTriangleIcon,
   RefreshCwIcon,
   BarChart3Icon,
-  DownloadIcon,
   FileTextIcon
 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -26,8 +25,6 @@ import { toast } from 'sonner';
 import { 
   AreaChart, 
   Area, 
-  BarChart, 
-  Bar, 
   XAxis, 
   YAxis, 
   CartesianGrid, 
@@ -44,6 +41,7 @@ import Logo from '@/components/Logo';
 import { APP_NAME } from '@/lib/constants';
 import { jsPDF } from 'jspdf';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { getHospitalInfo } from '@/utils/auth';
 
 export const HOSPITAL_NAME = "LifeFlow Medical Center";
 
@@ -54,6 +52,8 @@ export default function Dashboard() {
   const [donationStats, setDonationStats] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const isMobile = useIsMobile();
+  const hospital = getHospitalInfo();
+  const hospitalName = hospital?.name || "Hospital";
 
   const fetchDashboardData = async () => {
     setLoading(true);
@@ -145,7 +145,7 @@ export default function Dashboard() {
       const doc = new jsPDF();
       
       doc.setFontSize(18);
-      doc.text(`${HOSPITAL_NAME} - Blood Bank Analytics`, 14, 20);
+      doc.text(`${hospitalName} - Blood Bank Analytics`, 14, 20);
       doc.setFontSize(12);
       doc.text(`Generated on ${new Date().toLocaleDateString()}`, 14, 30);
       
@@ -175,7 +175,7 @@ export default function Dashboard() {
         doc.text(`Total: ${lastMonthData.total} donations`, 20, yPos + 3);
       }
       
-      doc.save(`${HOSPITAL_NAME.replace(/\s+/g, '_')}_analytics_report.pdf`);
+      doc.save(`${hospitalName.replace(/\s+/g, '_')}_analytics_report.pdf`);
       
       toast.success("Analytics report downloaded successfully");
     } catch (error) {
@@ -193,7 +193,7 @@ export default function Dashboard() {
       doc.setFontSize(22);
       doc.text(`${APP_NAME}`, 105, 20, { align: 'center' });
       doc.setFontSize(16);
-      doc.text(`${HOSPITAL_NAME} - Comprehensive Blood Bank Report`, 105, 30, { align: 'center' });
+      doc.text(`${hospitalName} - Comprehensive Blood Bank Report`, 105, 30, { align: 'center' });
       doc.setFontSize(10);
       doc.text(`Generated on ${new Date().toLocaleDateString()} at ${new Date().toLocaleTimeString()}`, 105, 40, { align: 'center' });
       
@@ -244,7 +244,7 @@ export default function Dashboard() {
         doc.text("No urgent requests at this time", 20, yPos);
       }
       
-      doc.save(`${HOSPITAL_NAME.replace(/\s+/g, '_')}_comprehensive_report.pdf`);
+      doc.save(`${hospitalName.replace(/\s+/g, '_')}_comprehensive_report.pdf`);
       
       toast.success("Comprehensive report downloaded successfully");
     } catch (error) {
@@ -268,7 +268,7 @@ export default function Dashboard() {
   return (
     <>
       <Helmet>
-        <title>Dashboard | {HOSPITAL_NAME} Blood Bank</title>
+        <title>Dashboard | {hospitalName} Blood Bank</title>
       </Helmet>
       <div className="flex flex-col gap-6 md:gap-8 animate-fade-in">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -277,7 +277,7 @@ export default function Dashboard() {
             <div>
               <h1 className="text-xl md:text-2xl font-bold tracking-tight">Dashboard</h1>
               <p className="text-sm md:text-base text-muted-foreground">
-                {HOSPITAL_NAME} Blood Bank Management System
+                {hospitalName} Blood Bank Management System
               </p>
               <p className="text-xs text-muted-foreground mt-1">
                 Powered by {APP_NAME}

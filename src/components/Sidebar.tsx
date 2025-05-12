@@ -16,7 +16,7 @@ import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import Logo from '@/components/Logo';
 import { APP_NAME } from '@/lib/constants';
-import { logout } from '@/utils/auth';
+import { logout, getAdminInfo, getHospitalInfo } from '@/utils/auth';
 import { toast } from 'sonner';
 
 type NavItem = {
@@ -37,6 +37,11 @@ const navItems: NavItem[] = [
 export default function Sidebar() {
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
   const location = useLocation();
+  const admin = getAdminInfo();
+  const adminName = admin?.name || "Admin User";
+  const adminEmail = admin?.email || "admin@bloodbank.org";
+  const hospital = getHospitalInfo();
+  const hospitalName = hospital?.name;
   
   const handleLogout = () => {
     logout();
@@ -67,6 +72,14 @@ export default function Sidebar() {
           </div>
         </div>
         
+        {hospitalName && (
+          <div className="px-4 py-2 border-b border-border">
+            <p className="text-sm font-medium text-muted-foreground">
+              {hospitalName}
+            </p>
+          </div>
+        )}
+        
         <div className="flex-1 py-6 px-4 space-y-1 overflow-y-auto">
           {navItems.map((item) => (
             <Link
@@ -94,11 +107,11 @@ export default function Sidebar() {
           <div className="flex flex-col gap-3">
             <div className="flex items-center gap-3">
               <div className="rounded-full w-8 h-8 bg-muted flex items-center justify-center text-muted-foreground">
-                A
+                {adminName.charAt(0)}
               </div>
               <div>
-                <p className="text-sm font-medium">Admin User</p>
-                <p className="text-xs text-muted-foreground">admin@bloodbank.org</p>
+                <p className="text-sm font-medium">{adminName}</p>
+                <p className="text-xs text-muted-foreground">{adminEmail}</p>
               </div>
             </div>
             <Button 
@@ -130,6 +143,14 @@ export default function Sidebar() {
             </div>
           </div>
           
+          {hospitalName && (
+            <div className="px-4 py-2 border-b border-border">
+              <p className="text-sm font-medium text-muted-foreground">
+                {hospitalName}
+              </p>
+            </div>
+          )}
+          
           <div className="flex-1 py-6 px-4 space-y-1 overflow-y-auto">
             {navItems.map((item) => (
               <Link
@@ -158,11 +179,11 @@ export default function Sidebar() {
             <div className="flex flex-col gap-3">
               <div className="flex items-center gap-3">
                 <div className="rounded-full w-8 h-8 bg-muted flex items-center justify-center text-muted-foreground">
-                  A
+                  {adminName.charAt(0)}
                 </div>
                 <div>
-                  <p className="text-sm font-medium">Admin User</p>
-                  <p className="text-xs text-muted-foreground">admin@bloodbank.org</p>
+                  <p className="text-sm font-medium">{adminName}</p>
+                  <p className="text-xs text-muted-foreground">{adminEmail}</p>
                 </div>
               </div>
               <Button 
@@ -181,3 +202,4 @@ export default function Sidebar() {
     </>
   );
 }
+
