@@ -1,3 +1,4 @@
+
 // Application name - This is the name of the blood bank management system itself
 export const APP_NAME = "VitaBank";
 
