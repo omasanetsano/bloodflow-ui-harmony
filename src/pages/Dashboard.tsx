@@ -43,6 +43,7 @@ import {
 import Logo from '@/components/Logo';
 import { APP_NAME } from '@/lib/constants';
 import { jsPDF } from 'jspdf';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 export const HOSPITAL_NAME = "LifeFlow Medical Center";
 
@@ -52,6 +53,7 @@ export default function Dashboard() {
   const [urgentRequests, setUrgentRequests] = useState<BloodRequest[]>([]);
   const [donationStats, setDonationStats] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const isMobile = useIsMobile();
 
   const fetchDashboardData = async () => {
     setLoading(true);
@@ -268,13 +270,13 @@ export default function Dashboard() {
       <Helmet>
         <title>Dashboard | {HOSPITAL_NAME} Blood Bank</title>
       </Helmet>
-      <div className="flex flex-col gap-8 animate-fade-in">
+      <div className="flex flex-col gap-6 md:gap-8 animate-fade-in">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div className="flex items-center gap-3">
             <Logo size="lg" />
             <div>
-              <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
-              <p className="text-muted-foreground">
+              <h1 className="text-xl md:text-2xl font-bold tracking-tight">Dashboard</h1>
+              <p className="text-sm md:text-base text-muted-foreground">
                 {HOSPITAL_NAME} Blood Bank Management System
               </p>
               <p className="text-xs text-muted-foreground mt-1">
@@ -285,31 +287,31 @@ export default function Dashboard() {
           <div className="flex flex-wrap gap-2">
             <Button 
               variant="outline" 
-              size="sm" 
-              className="flex gap-2 items-center"
+              size={isMobile ? "sm" : "default"} 
+              className="flex gap-2 items-center text-xs md:text-sm"
               onClick={exportAnalytics}
             >
-              <FileTextIcon className="w-4 h-4" />
-              Export Report
+              <FileTextIcon className="w-3 h-3 md:w-4 md:h-4" />
+              {isMobile ? "Report" : "Export Report"}
             </Button>
             <Button 
               variant="outline" 
-              size="sm" 
-              className="flex gap-2 items-center"
+              size={isMobile ? "sm" : "default"} 
+              className="flex gap-2 items-center text-xs md:text-sm"
               onClick={generateReport}
             >
-              <FileTextIcon className="w-4 h-4" />
-              Full Report
+              <FileTextIcon className="w-3 h-3 md:w-4 md:h-4" />
+              {isMobile ? "Full" : "Full Report"}
             </Button>
             <Button 
               variant="outline" 
-              size="sm" 
-              className="flex gap-2 items-center"
+              size={isMobile ? "sm" : "default"} 
+              className="flex gap-2 items-center text-xs md:text-sm"
               onClick={handleRefresh}
               disabled={loading}
             >
-              <RefreshCwIcon className="w-4 h-4" />
-              Refresh
+              <RefreshCwIcon className="w-3 h-3 md:w-4 md:h-4" />
+              {isMobile ? "" : "Refresh"}
             </Button>
           </div>
         </div>
@@ -347,16 +349,16 @@ export default function Dashboard() {
               <CardDescription>Current blood inventory levels by type</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 md:gap-4">
                 {inventoryStats.map(stat => (
-                  <div key={stat.bloodType} className="p-4 border rounded-lg bg-white dark:bg-gray-800 shadow-sm transition-all hover:shadow-md">
+                  <div key={stat.bloodType} className="p-3 md:p-4 border rounded-lg bg-white dark:bg-gray-800 shadow-sm transition-all hover:shadow-md">
                     <div className="flex items-center justify-between mb-2">
                       <BloodTypeTag type={stat.bloodType} />
                       {stat.available <= 2 && (
                         <AlertTriangleIcon className="h-4 w-4 text-red-500" />
                       )}
                     </div>
-                    <p className="text-2xl font-semibold">{stat.available}</p>
+                    <p className="text-xl md:text-2xl font-semibold">{stat.available}</p>
                     <p className="text-xs text-muted-foreground">
                       Available Units ({stat.reserved} reserved)
                     </p>
@@ -368,7 +370,7 @@ export default function Dashboard() {
                 <div className="mt-4 p-3 bg-red-50 border border-red-100 rounded-lg dark:bg-red-950/20 dark:border-red-900/30">
                   <div className="flex items-center gap-2 text-red-800 dark:text-red-400">
                     <AlertTriangleIcon className="h-4 w-4" />
-                    <p className="text-sm font-medium">
+                    <p className="text-xs md:text-sm font-medium">
                       Critical Inventory Alert: Low stock for {criticalTypes.join(', ')}
                     </p>
                   </div>
@@ -384,32 +386,39 @@ export default function Dashboard() {
               <CardTitle className="text-lg font-medium">Blood Donation Trends</CardTitle>
               <CardDescription>Monthly donation statistics by blood type</CardDescription>
             </CardHeader>
-            <CardContent className="h-[400px]">
+            <CardContent className="h-[300px] md:h-[400px]">
               {donationStats.length > 0 ? (
                 <ChartContainer config={chartConfig} className="h-full">
                   <ResponsiveContainer width="100%" height="100%">
                     <AreaChart
                       data={donationStats}
-                      margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
+                      margin={{ 
+                        top: 10, 
+                        right: isMobile ? 10 : 30, 
+                        left: isMobile ? -20 : 0, 
+                        bottom: 0 
+                      }}
                     >
                       <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
                       <XAxis 
                         dataKey="month" 
-                        tick={{ fontSize: 12 }} 
+                        tick={{ fontSize: isMobile ? 8 : 12 }}
+                        tickFormatter={isMobile ? (value) => value.split(' ')[0] : undefined}
                       />
                       <YAxis 
-                        tick={{ fontSize: 12 }} 
-                        label={{ 
+                        tick={{ fontSize: isMobile ? 8 : 12 }} 
+                        width={isMobile ? 20 : 30}
+                        label={isMobile ? null : { 
                           value: 'Donations', 
                           angle: -90, 
                           position: 'insideLeft', 
                           style: { fontSize: 12 } 
-                        }} 
+                        }}
                       />
                       <ChartTooltip
                         content={<ChartTooltipContent />}
                       />
-                      <Legend />
+                      <Legend wrapperStyle={{ fontSize: isMobile ? 8 : 12 }} />
                       <Area 
                         type="monotone" 
                         dataKey="A+" 
@@ -492,14 +501,14 @@ export default function Dashboard() {
                 <CardDescription>Last 5 blood units collected</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
+                <div className="space-y-3 md:space-y-4">
                   {latestDonations.map(unit => (
-                    <div key={unit.id} className="flex items-center justify-between border-b border-gray-100 dark:border-gray-800 pb-4 last:border-0 last:pb-0">
+                    <div key={unit.id} className="flex items-center justify-between border-b border-gray-100 dark:border-gray-800 pb-3 md:pb-4 last:border-0 last:pb-0">
                       <div>
-                        <p className="font-medium">{unit.donorName}</p>
+                        <p className="font-medium text-sm md:text-base">{unit.donorName}</p>
                         <div className="flex items-center gap-2 mt-1">
                           <BloodTypeTag type={unit.bloodType} />
-                          <span className="text-sm text-gray-500">
+                          <span className="text-xs md:text-sm text-gray-500">
                             {unit.quantity} ml
                           </span>
                         </div>
@@ -530,14 +539,14 @@ export default function Dashboard() {
                 <CardDescription>High priority requests that need attention</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
+                <div className="space-y-3 md:space-y-4">
                   {urgentRequests.map(request => (
-                    <div key={request.id} className="flex items-center justify-between border-b border-gray-100 dark:border-gray-800 pb-4 last:border-0 last:pb-0">
+                    <div key={request.id} className="flex items-center justify-between border-b border-gray-100 dark:border-gray-800 pb-3 md:pb-4 last:border-0 last:pb-0">
                       <div>
-                        <p className="font-medium">{request.patientName}</p>
+                        <p className="font-medium text-sm md:text-base">{request.patientName}</p>
                         <div className="flex items-center gap-2 mt-1">
                           <BloodTypeTag type={request.bloodType} />
-                          <span className="text-sm text-gray-500">
+                          <span className="text-xs md:text-sm text-gray-500">
                             {request.quantity} ml
                           </span>
                         </div>

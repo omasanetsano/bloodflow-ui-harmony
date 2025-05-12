@@ -1,6 +1,5 @@
-
 // Application name - This is the name of the blood bank management system itself
-export const APP_NAME = "BloodCore";
+export const APP_NAME = "VitaBank";
 
 // Default settings that can be overridden in user preferences
 export const DEFAULT_DATE_FORMAT = "MM/DD/YYYY";

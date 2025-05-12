@@ -9,12 +9,15 @@ import {
   HomeIcon, 
   Settings2Icon,
   MenuIcon,
-  XIcon
+  XIcon,
+  LogOutIcon
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import Logo from '@/components/Logo';
 import { APP_NAME } from '@/lib/constants';
+import { logout } from '@/utils/auth';
+import { toast } from 'sonner';
 
 type NavItem = {
   name: string;
@@ -34,6 +37,11 @@ const navItems: NavItem[] = [
 export default function Sidebar() {
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
   const location = useLocation();
+  
+  const handleLogout = () => {
+    logout();
+    toast.success("Logged out successfully");
+  };
   
   return (
     <>
@@ -83,14 +91,25 @@ export default function Sidebar() {
         </div>
         
         <div className="p-4 border-t border-border">
-          <div className="flex items-center gap-3">
-            <div className="rounded-full w-8 h-8 bg-muted flex items-center justify-center text-muted-foreground">
-              A
+          <div className="flex flex-col gap-3">
+            <div className="flex items-center gap-3">
+              <div className="rounded-full w-8 h-8 bg-muted flex items-center justify-center text-muted-foreground">
+                A
+              </div>
+              <div>
+                <p className="text-sm font-medium">Admin User</p>
+                <p className="text-xs text-muted-foreground">admin@bloodbank.org</p>
+              </div>
             </div>
-            <div>
-              <p className="text-sm font-medium">Admin User</p>
-              <p className="text-xs text-muted-foreground">admin@bloodbank.org</p>
-            </div>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={handleLogout}
+              className="w-full flex items-center gap-2 justify-center mt-1"
+            >
+              <LogOutIcon className="w-4 h-4" />
+              <span>Logout</span>
+            </Button>
           </div>
         </div>
       </div>
@@ -136,14 +155,25 @@ export default function Sidebar() {
           </div>
           
           <div className="p-4 border-t border-border">
-            <div className="flex items-center gap-3">
-              <div className="rounded-full w-8 h-8 bg-muted flex items-center justify-center text-muted-foreground">
-                A
+            <div className="flex flex-col gap-3">
+              <div className="flex items-center gap-3">
+                <div className="rounded-full w-8 h-8 bg-muted flex items-center justify-center text-muted-foreground">
+                  A
+                </div>
+                <div>
+                  <p className="text-sm font-medium">Admin User</p>
+                  <p className="text-xs text-muted-foreground">admin@bloodbank.org</p>
+                </div>
               </div>
-              <div>
-                <p className="text-sm font-medium">Admin User</p>
-                <p className="text-xs text-muted-foreground">admin@bloodbank.org</p>
-              </div>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={handleLogout}
+                className="w-full flex items-center gap-2 justify-center mt-1"
+              >
+                <LogOutIcon className="w-4 h-4" />
+                <span>Logout</span>
+              </Button>
             </div>
           </div>
         </div>

@@ -1,3 +1,4 @@
+
 import { DropletIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { APP_NAME } from "@/lib/constants";
@@ -33,7 +34,7 @@ export default function Logo({
       </span>
       </div>
       {showText && <span className={cn("font-bold tracking-tight text-foreground leading-none", textSizeClasses[size])}>
-          <span className="text-bloodRed-500"></span>
+          <span className="text-bloodRed-500">{APP_NAME}</span>
           <span></span>
           {!appNameOnly && <span className="text-xs font-normal text-muted-foreground ml-1"></span>}
         </span>}
