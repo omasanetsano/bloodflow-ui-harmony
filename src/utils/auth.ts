@@ -1,6 +1,14 @@
 
 // This is a placeholder auth utility that will be replaced with Supabase auth
 
+// Define the hospital type for type safety
+export type HospitalType = 'private' | 'government' | 'nonprofit';
+
+export interface Hospital {
+  name: string;
+  type: HospitalType;
+}
+
 // Mock function to simulate login
 export const login = (email: string, password: string): Promise<boolean> => {
   return new Promise((resolve) => {
@@ -76,7 +84,7 @@ export const getCurrentUser = () => {
 };
 
 // Add hospitals for system admin
-export const addHospital = (hospital: { name: string, type: string }) => {
+export const addHospital = (hospital: Hospital) => {
   const hospitals = localStorage.getItem("managedHospitals") 
     ? JSON.parse(localStorage.getItem("managedHospitals") || "[]")
     : [];
@@ -88,7 +96,7 @@ export const addHospital = (hospital: { name: string, type: string }) => {
 };
 
 // Get managed hospitals
-export const getManagedHospitals = () => {
+export const getManagedHospitals = (): Hospital[] => {
   return localStorage.getItem("managedHospitals") 
     ? JSON.parse(localStorage.getItem("managedHospitals") || "[]")
     : [];

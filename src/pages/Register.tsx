@@ -14,12 +14,12 @@ import Logo from "@/components/Logo";
 import { APP_NAME } from "@/lib/constants";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { register } from "@/utils/auth";
+import { register as registerUser, HospitalType, Hospital } from "@/utils/auth";
 import { X, Plus } from "lucide-react";
 
 const hospitalSchema = z.object({
   name: z.string().min(2, "Hospital name is required"),
-  type: z.enum(["private", "government", "nonprofit"])
+  type: z.enum(["private", "government", "nonprofit"] as const)
 });
 
 const registerSchema = z.object({
@@ -29,7 +29,7 @@ const registerSchema = z.object({
   confirmPassword: z.string(),
   userType: z.enum(["admin", "hospital"]),
   hospitalName: z.string().optional(),
-  hospitalType: z.enum(["private", "government", "nonprofit"]).optional(),
+  hospitalType: z.enum(["private", "government", "nonprofit"] as const).optional(),
   hospitals: z.array(hospitalSchema).optional(),
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Passwords do not match",
@@ -55,8 +55,8 @@ const Register = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
-  const [hospitals, setHospitals] = useState<{ name: string; type: string }[]>([]);
-  const [newHospital, setNewHospital] = useState({ name: "", type: "private" as const });
+  const [hospitals, setHospitals] = useState<Hospital[]>([]);
+  const [newHospital, setNewHospital] = useState<Hospital>({ name: "", type: "private" });
 
   const form = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
@@ -122,7 +122,7 @@ const Register = () => {
       }
       
       // Register with our auth utility (will be replaced with Supabase)
-      const success = await register(data);
+      const success = await registerUser(data);
       
       if (success) {
         toast({
@@ -291,7 +291,7 @@ const Register = () => {
                           </div>
                           <Select 
                             value={newHospital.type}
-                            onValueChange={(value: "private" | "government" | "nonprofit") => 
+                            onValueChange={(value: HospitalType) => 
                               setNewHospital({...newHospital, type: value})
                             }
                           >
