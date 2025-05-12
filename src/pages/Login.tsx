@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,6 +12,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useToast } from "@/hooks/use-toast";
 import Logo from "@/components/Logo";
 import { APP_NAME } from "@/lib/constants";
+import { login } from "@/utils/auth";
 
 const loginSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
@@ -22,6 +23,7 @@ type LoginFormValues = z.infer<typeof loginSchema>;
 
 const Login = () => {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
 
   const form = useForm<LoginFormValues>({
@@ -36,19 +38,27 @@ const Login = () => {
     setIsLoading(true);
     try {
       console.log("Login credentials:", data);
-      // This would be where you connect to Supabase auth
-      // For now, we'll simulate a successful login
       
-      toast({
-        title: "Login successful",
-        description: "Redirecting to dashboard...",
-      });
+      // Login with our auth utility (will be replaced with Supabase)
+      const success = await login(data.email, data.password);
       
-      // Simulate network delay
-      setTimeout(() => {
-        window.location.href = "/";
-      }, 1500);
-      
+      if (success) {
+        toast({
+          title: "Login successful",
+          description: "Redirecting to dashboard...",
+        });
+        
+        // Redirect to dashboard after successful login
+        setTimeout(() => {
+          navigate("/");
+        }, 1500);
+      } else {
+        toast({
+          title: "Login failed",
+          description: "Please check your credentials and try again",
+          variant: "destructive",
+        });
+      }
     } catch (error) {
       console.error("Login error:", error);
       toast({
@@ -78,7 +88,7 @@ const Login = () => {
           <CardHeader>
             <CardTitle>Login</CardTitle>
             <CardDescription>
-              Enter your credentials to access your hospital dashboard
+              Enter your credentials to access your dashboard
             </CardDescription>
           </CardHeader>
           <CardContent>

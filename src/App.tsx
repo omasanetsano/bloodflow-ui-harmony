@@ -18,6 +18,7 @@ import Login from "@/pages/Login";
 import Register from "@/pages/Register";
 import { HOSPITAL_NAME } from "@/pages/Dashboard";
 import { APP_NAME } from "@/lib/constants";
+import { isAuthenticated } from "@/utils/auth";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -27,12 +28,6 @@ const queryClient = new QueryClient({
     },
   },
 });
-
-// Simple auth check (will be replaced with Supabase auth later)
-const isAuthenticated = () => {
-  // This should be replaced with actual auth check using Supabase
-  return localStorage.getItem("isAuthenticated") === "true";
-};
 
 // Protected route component
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
