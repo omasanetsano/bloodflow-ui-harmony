@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet';
 import { 
@@ -57,12 +56,16 @@ import {
   ChartTooltip
 } from '@/components/ui/chart';
 import BloodTypeTag from '@/components/BloodTypeTag';
-import { HOSPITAL_NAME } from './Dashboard';
+import { DEFAULT_HOSPITAL_NAME } from '@/lib/constants';
+import { useHospital } from '@/hooks/useHospital';
 import { inventoryService, bloodUnitService } from '@/lib/mockData';
 import { InventoryItem, BloodType, BloodUnit } from '@/lib/types';
 import { jsPDF } from 'jspdf';
 
 export default function Inventory() {
+  // Add the hospital hook
+  const { hospitalName } = useHospital();
+  
   const [inventory, setInventory] = useState<InventoryItem[]>([]);
   const [expiringUnits, setExpiringUnits] = useState<BloodUnit[]>([]);
   const [loading, setLoading] = useState(true);
@@ -168,7 +171,7 @@ export default function Inventory() {
       
       // Add hospital name
       doc.setFontSize(12);
-      doc.text(`${HOSPITAL_NAME} Blood Bank`, 15, 40);
+      doc.text(`${hospitalName} Blood Bank`, 15, 40);
       
       // Add inventory section
       doc.setFontSize(14);
@@ -277,7 +280,7 @@ export default function Inventory() {
   return (
     <>
       <Helmet>
-        <title>Inventory | {HOSPITAL_NAME} Blood Bank</title>
+        <title>Blood Inventory | {hospitalName} Blood Bank</title>
       </Helmet>
       
       <div className="flex flex-col gap-8 animate-fade-in">

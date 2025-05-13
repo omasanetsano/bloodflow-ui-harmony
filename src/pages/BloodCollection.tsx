@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet';
 import { 
@@ -51,9 +50,10 @@ import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import BloodTypeTag from '@/components/BloodTypeTag';
 import StatusBadge from '@/components/StatusBadge';
-import { HOSPITAL_NAME } from './Dashboard';
+import { DEFAULT_HOSPITAL_NAME } from '@/lib/constants';
 import { donorService, bloodUnitService } from '@/lib/mockData';
 import { BloodUnit, Donor, BloodType } from '@/lib/types';
+import { getHospitalInfo } from '@/utils/auth';
 
 const formSchema = z.object({
   donorId: z.string().min(1, { message: 'Donor is required' }),
@@ -69,6 +69,8 @@ export default function BloodCollection() {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState<string>('all');
   const [open, setOpen] = useState(false);
+  const [hospital, setHospital] = useState<any>(null);
+  const hospitalName = hospital?.name || DEFAULT_HOSPITAL_NAME;
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -83,11 +85,16 @@ export default function BloodCollection() {
     try {
       const [donationsData, donorsData] = await Promise.all([
         bloodUnitService.getBloodUnits(),
-        donorService.getDonors()
+        donorService.getDonors(),
+        // Add fetch for hospital info
       ]);
       
       setDonations(donationsData);
       setDonors(donorsData);
+      
+      // Fetch hospital info
+      const hospitalInfo = await getHospitalInfo();
+      setHospital(hospitalInfo);
     } catch (error) {
       console.error('Error fetching data:', error);
       toast.error('Failed to load data');
@@ -172,7 +179,7 @@ export default function BloodCollection() {
   return (
     <>
       <Helmet>
-        <title>Blood Collection | {HOSPITAL_NAME} Blood Bank</title>
+        <title>Blood Collection | {hospitalName} Blood Bank</title>
       </Helmet>
       
       <div className="flex flex-col gap-8">

@@ -1,20 +1,20 @@
-
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet';
 import { 
   Settings2Icon, 
+  SaveIcon, 
   UserIcon, 
-  BellIcon, 
-  ShieldIcon, 
-  GlobeIcon, 
-  PaletteIcon,
-  SaveIcon,
-  ServerIcon,
-  BuildingIcon
+  BuildingIcon, 
+  MailIcon,
+  PhoneIcon,
+  GlobeIcon,
+  ImageIcon
 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   Select, 
   SelectContent, 
@@ -23,270 +23,232 @@ import {
   SelectValue 
 } from '@/components/ui/select';
 import { toast } from 'sonner';
-import { Switch } from '@/components/ui/switch';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useTheme } from '@/providers/ThemeProvider';
-import { HOSPITAL_NAME } from './Dashboard';
-import { APP_NAME } from '@/lib/constants';
-import Logo from '@/components/Logo';
+import { DEFAULT_HOSPITAL_NAME } from '@/lib/constants';
+import { useHospital } from '@/hooks/useHospital';
 
 export default function Settings() {
-  const { theme, setTheme } = useTheme();
-  const [hospitalName, setHospitalName] = useState(HOSPITAL_NAME);
-  const [emailNotifications, setEmailNotifications] = useState(true);
-  const [smsNotifications, setSmsNotifications] = useState(false);
-  const [criticalAlertsThreshold, setCriticalAlertsThreshold] = useState(3);
-  const [language, setLanguage] = useState('en');
-  const [dateFormat, setDateFormat] = useState('MM/DD/YYYY');
-  const [temperatureUnit, setTemperatureUnit] = useState('celsius');
+  const { hospitalName } = useHospital();
+  const [saving, setSaving] = useState(false);
+  const [activeTab, setActiveTab] = useState('profile');
   
-  const handleSaveSettings = () => {
-    // In a real app, this would persist settings to a backend
-    toast.success('Settings saved successfully');
+  const [hospitalSettings, setHospitalSettings] = useState({
+    name: 'City General Hospital',
+    type: 'government',
+    email: 'contact@citygeneralhospital.org',
+    phone: '+1 (555) 123-4567',
+    address: '123 Medical Center Blvd, Healthcare City, HC 12345',
+    website: 'https://citygeneralhospital.org',
+    logo: '/placeholder-logo.png'
+  });
+  
+  const [userSettings, setUserSettings] = useState({
+    name: 'Dr. Jane Smith',
+    email: 'jane.smith@citygeneralhospital.org',
+    role: 'admin',
+    notifications: {
+      email: true,
+      push: true,
+      lowInventory: true,
+      newRequests: true
+    }
+  });
+  
+  const [systemSettings, setSystemSettings] = useState({
+    theme: 'system',
+    language: 'en',
+    dateFormat: 'MM/DD/YYYY',
+    timeFormat: '12h',
+    autoLogout: 30,
+    criticalLevel: 2
+  });
+  
+  const handleHospitalChange = (field: string, value: string) => {
+    setHospitalSettings(prev => ({
+      ...prev,
+      [field]: value
+    }));
   };
-
-  const handleResetSettings = () => {
-    setHospitalName(HOSPITAL_NAME);
-    setEmailNotifications(true);
-    setSmsNotifications(false);
-    setCriticalAlertsThreshold(3);
-    setLanguage('en');
-    setDateFormat('MM/DD/YYYY');
-    setTemperatureUnit('celsius');
-    setTheme('system');
-    toast.success('Settings reset to defaults');
+  
+  const handleUserChange = (field: string, value: string | boolean) => {
+    setUserSettings(prev => ({
+      ...prev,
+      [field]: value
+    }));
   };
-
+  
+  const handleNotificationChange = (field: string, value: boolean) => {
+    setUserSettings(prev => ({
+      ...prev,
+      notifications: {
+        ...prev.notifications,
+        [field]: value
+      }
+    }));
+  };
+  
+  const handleSystemChange = (field: string, value: string | number) => {
+    setSystemSettings(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+  
+  const saveSettings = async () => {
+    setSaving(true);
+    
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      toast.success('Settings saved successfully');
+    } catch (error) {
+      console.error('Error saving settings:', error);
+      toast.error('Failed to save settings');
+    } finally {
+      setSaving(false);
+    }
+  };
+  
   return (
     <>
       <Helmet>
         <title>Settings | {hospitalName} Blood Bank</title>
       </Helmet>
+      
       <div className="flex flex-col gap-8">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Settings</h1>
-          <p className="text-muted-foreground">
-            Configure system settings and user preferences
-          </p>
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight">Settings</h1>
+            <p className="text-muted-foreground">
+              Manage your account and system preferences
+            </p>
+          </div>
+          <Button 
+            onClick={saveSettings} 
+            disabled={saving}
+            className="bg-bloodRed-500 hover:bg-bloodRed-600 text-white"
+          >
+            <SaveIcon className="mr-2 h-4 w-4" />
+            {saving ? 'Saving...' : 'Save Changes'}
+          </Button>
         </div>
-
-        <div className="text-center p-4 rounded-lg border bg-card/50 backdrop-blur-sm">
-          <Logo size="lg" appNameOnly={true} className="mx-auto mb-3" />
-          <p className="text-sm text-muted-foreground">
-            {APP_NAME} Blood Bank Management System v1.0
-          </p>
-        </div>
-
-        <Tabs defaultValue="general" className="animate-fade-in transition-all duration-300">
-          <TabsList className="mb-6">
-            <TabsTrigger value="general">
-              <Settings2Icon className="h-4 w-4 mr-2" />
-              General
-            </TabsTrigger>
-            <TabsTrigger value="notifications">
-              <BellIcon className="h-4 w-4 mr-2" />
-              Notifications
-            </TabsTrigger>
-            <TabsTrigger value="appearance">
-              <PaletteIcon className="h-4 w-4 mr-2" />
-              Appearance
-            </TabsTrigger>
-            <TabsTrigger value="account">
+        
+        <Tabs defaultValue={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="grid grid-cols-3 mb-8">
+            <TabsTrigger value="profile">
               <UserIcon className="h-4 w-4 mr-2" />
-              Account
+              User Profile
+            </TabsTrigger>
+            <TabsTrigger value="hospital">
+              <BuildingIcon className="h-4 w-4 mr-2" />
+              Hospital
+            </TabsTrigger>
+            <TabsTrigger value="system">
+              <Settings2Icon className="h-4 w-4 mr-2" />
+              System
             </TabsTrigger>
           </TabsList>
           
-          {/* General Settings */}
-          <TabsContent value="general">
-            <Card className="bg-gradient-to-br from-card to-secondary/20 backdrop-blur-sm transition-all duration-300 hover:shadow-md">
+          <TabsContent value="profile" className="space-y-6">
+            <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <BuildingIcon className="h-5 w-5 text-muted-foreground" />
-                  Organization Settings
-                </CardTitle>
-                <CardDescription>Configure your organization information</CardDescription>
+                <CardTitle>User Profile</CardTitle>
+                <CardDescription>
+                  Manage your personal information and preferences
+                </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Hospital/Organization Name</label>
-                  <Input 
-                    value={hospitalName} 
-                    onChange={(e) => setHospitalName(e.target.value)} 
-                    placeholder="Enter hospital name"
-                    className="transition-all duration-300"
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    This name will appear throughout the application and on reports
-                  </p>
-                </div>
-                
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Language</label>
-                  <Select value={language} onValueChange={setLanguage}>
-                    <SelectTrigger className="transition-all duration-300">
-                      <GlobeIcon className="h-4 w-4 mr-2" />
-                      <SelectValue placeholder="Select language" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="en">English</SelectItem>
-                      <SelectItem value="es">Spanish</SelectItem>
-                      <SelectItem value="fr">French</SelectItem>
-                      <SelectItem value="de">German</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Date Format</label>
-                  <Select value={dateFormat} onValueChange={setDateFormat}>
-                    <SelectTrigger className="transition-all duration-300">
-                      <SelectValue placeholder="Select date format" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="MM/DD/YYYY">MM/DD/YYYY</SelectItem>
-                      <SelectItem value="DD/MM/YYYY">DD/MM/YYYY</SelectItem>
-                      <SelectItem value="YYYY-MM-DD">YYYY-MM-DD</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Temperature Unit</label>
-                  <div className="flex items-center gap-4">
-                    <div className="flex items-center space-x-2">
-                      <input
-                        type="radio"
-                        id="celsius"
-                        checked={temperatureUnit === 'celsius'}
-                        onChange={() => setTemperatureUnit('celsius')}
-                        className="rounded-full border-gray-300 text-bloodRed-600 focus:ring-bloodRed-600"
-                      />
-                      <label htmlFor="celsius">Celsius (°C)</label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <input
-                        type="radio"
-                        id="fahrenheit"
-                        checked={temperatureUnit === 'fahrenheit'}
-                        onChange={() => setTemperatureUnit('fahrenheit')}
-                        className="rounded-full border-gray-300 text-bloodRed-600 focus:ring-bloodRed-600"
-                      />
-                      <label htmlFor="fahrenheit">Fahrenheit (°F)</label>
-                    </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <Label htmlFor="name">Full Name</Label>
+                    <Input 
+                      id="name" 
+                      value={userSettings.name} 
+                      onChange={(e) => handleUserChange('name', e.target.value)} 
+                    />
                   </div>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-          
-          {/* Notifications Settings */}
-          <TabsContent value="notifications">
-            <Card className="bg-gradient-to-br from-card to-secondary/20 backdrop-blur-sm">
-              <CardHeader>
-                <CardTitle>Notification Settings</CardTitle>
-                <CardDescription>Configure alerts and notification preferences</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="flex items-center justify-between">
-                  <div className="space-y-0.5">
-                    <label className="text-sm font-medium">Email Notifications</label>
-                    <p className="text-xs text-muted-foreground">
-                      Receive important alerts via email
-                    </p>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="email">Email Address</Label>
+                    <Input 
+                      id="email" 
+                      type="email" 
+                      value={userSettings.email} 
+                      onChange={(e) => handleUserChange('email', e.target.value)} 
+                    />
                   </div>
-                  <Switch 
-                    checked={emailNotifications}
-                    onCheckedChange={setEmailNotifications}
-                  />
-                </div>
-                
-                <div className="flex items-center justify-between">
-                  <div className="space-y-0.5">
-                    <label className="text-sm font-medium">SMS Notifications</label>
-                    <p className="text-xs text-muted-foreground">
-                      Receive urgent alerts via SMS
-                    </p>
-                  </div>
-                  <Switch 
-                    checked={smsNotifications}
-                    onCheckedChange={setSmsNotifications}
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Critical Alerts Threshold</label>
-                  <Select 
-                    value={criticalAlertsThreshold.toString()} 
-                    onValueChange={(val) => setCriticalAlertsThreshold(parseInt(val))}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select threshold" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="1">1 unit</SelectItem>
-                      <SelectItem value="2">2 units</SelectItem>
-                      <SelectItem value="3">3 units</SelectItem>
-                      <SelectItem value="5">5 units</SelectItem>
-                      <SelectItem value="10">10 units</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <p className="text-xs text-muted-foreground">
-                    Send alerts when blood inventory falls below this threshold
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-          
-          {/* Appearance Settings */}
-          <TabsContent value="appearance">
-            <Card className="bg-gradient-to-br from-card to-secondary/20 backdrop-blur-sm">
-              <CardHeader>
-                <CardTitle>Appearance Settings</CardTitle>
-                <CardDescription>Customize the look and feel of the application</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Theme</label>
-                  <div className="grid grid-cols-3 gap-4">
-                    <div 
-                      className={`border-2 rounded-lg p-4 cursor-pointer transition-all ${
-                        theme === 'light' ? 'border-bloodRed-500 bg-bloodRed-50 dark:bg-bloodRed-950/20' : 'border-border'
-                      }`}
-                      onClick={() => setTheme('light')}
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="role">Role</Label>
+                    <Select 
+                      value={userSettings.role} 
+                      onValueChange={(value) => handleUserChange('role', value)}
                     >
-                      <div className="bg-white rounded-md border p-4 mb-3 shadow-sm">
-                        <div className="h-2 w-16 bg-gray-200 rounded-md mb-2"></div>
-                        <div className="h-2 w-10 bg-gray-200 rounded-md"></div>
-                      </div>
-                      <div className="text-center text-sm font-medium">Light</div>
+                      <SelectTrigger id="role">
+                        <SelectValue placeholder="Select role" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="admin">Administrator</SelectItem>
+                        <SelectItem value="manager">Manager</SelectItem>
+                        <SelectItem value="staff">Staff</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="password">Password</Label>
+                    <div className="flex gap-2">
+                      <Input id="password" type="password" value="••••••••" disabled />
+                      <Button variant="outline">Change</Button>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="border-t pt-6">
+                  <h3 className="text-lg font-medium mb-4">Notification Preferences</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="flex items-center space-x-2">
+                      <input 
+                        type="checkbox" 
+                        id="email-notifications" 
+                        className="rounded border-gray-300 text-bloodRed-500 focus:ring-bloodRed-500"
+                        checked={userSettings.notifications.email}
+                        onChange={(e) => handleNotificationChange('email', e.target.checked)}
+                      />
+                      <Label htmlFor="email-notifications">Email Notifications</Label>
                     </div>
                     
-                    <div 
-                      className={`border-2 rounded-lg p-4 cursor-pointer transition-all ${
-                        theme === 'dark' ? 'border-bloodRed-500 bg-bloodRed-50 dark:bg-bloodRed-950/20' : 'border-border'
-                      }`}
-                      onClick={() => setTheme('dark')}
-                    >
-                      <div className="bg-gray-800 rounded-md border border-gray-700 p-4 mb-3 shadow-sm">
-                        <div className="h-2 w-16 bg-gray-600 rounded-md mb-2"></div>
-                        <div className="h-2 w-10 bg-gray-600 rounded-md"></div>
-                      </div>
-                      <div className="text-center text-sm font-medium">Dark</div>
+                    <div className="flex items-center space-x-2">
+                      <input 
+                        type="checkbox" 
+                        id="push-notifications" 
+                        className="rounded border-gray-300 text-bloodRed-500 focus:ring-bloodRed-500"
+                        checked={userSettings.notifications.push}
+                        onChange={(e) => handleNotificationChange('push', e.target.checked)}
+                      />
+                      <Label htmlFor="push-notifications">Push Notifications</Label>
                     </div>
                     
-                    <div 
-                      className={`border-2 rounded-lg p-4 cursor-pointer transition-all ${
-                        theme === 'system' ? 'border-bloodRed-500 bg-bloodRed-50 dark:bg-bloodRed-950/20' : 'border-border'
-                      }`}
-                      onClick={() => setTheme('system')}
-                    >
-                      <div className="bg-gradient-to-r from-white to-gray-800 rounded-md border p-4 mb-3 shadow-sm">
-                        <div className="h-2 w-16 bg-gray-400 rounded-md mb-2"></div>
-                        <div className="h-2 w-10 bg-gray-400 rounded-md"></div>
-                      </div>
-                      <div className="text-center text-sm font-medium">System</div>
+                    <div className="flex items-center space-x-2">
+                      <input 
+                        type="checkbox" 
+                        id="low-inventory" 
+                        className="rounded border-gray-300 text-bloodRed-500 focus:ring-bloodRed-500"
+                        checked={userSettings.notifications.lowInventory}
+                        onChange={(e) => handleNotificationChange('lowInventory', e.target.checked)}
+                      />
+                      <Label htmlFor="low-inventory">Low Inventory Alerts</Label>
+                    </div>
+                    
+                    <div className="flex items-center space-x-2">
+                      <input 
+                        type="checkbox" 
+                        id="new-requests" 
+                        className="rounded border-gray-300 text-bloodRed-500 focus:ring-bloodRed-500"
+                        checked={userSettings.notifications.newRequests}
+                        onChange={(e) => handleNotificationChange('newRequests', e.target.checked)}
+                      />
+                      <Label htmlFor="new-requests">New Request Alerts</Label>
                     </div>
                   </div>
                 </div>
@@ -294,69 +256,229 @@ export default function Settings() {
             </Card>
           </TabsContent>
           
-          {/* Account Settings */}
-          <TabsContent value="account">
-            <Card className="bg-gradient-to-br from-card to-secondary/20 backdrop-blur-sm">
+          <TabsContent value="hospital" className="space-y-6">
+            <Card>
               <CardHeader>
-                <CardTitle>Account Settings</CardTitle>
-                <CardDescription>Manage your account and security preferences</CardDescription>
+                <CardTitle>Hospital Information</CardTitle>
+                <CardDescription>
+                  Update your hospital details and contact information
+                </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
-                <div className="flex items-center gap-4">
-                  <div className="h-16 w-16 rounded-full bg-muted flex items-center justify-center text-2xl font-semibold">
-                    A
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <Label htmlFor="hospital-name">Hospital Name</Label>
+                    <Input 
+                      id="hospital-name" 
+                      value={hospitalSettings.name} 
+                      onChange={(e) => handleHospitalChange('name', e.target.value)} 
+                    />
                   </div>
-                  <div>
-                    <h3 className="font-medium">Admin User</h3>
-                    <p className="text-sm text-muted-foreground">admin@bloodbank.org</p>
-                    <Button variant="link" className="p-0 h-auto text-sm text-bloodRed-500">
-                      Change profile picture
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="hospital-type">Hospital Type</Label>
+                    <Select 
+                      value={hospitalSettings.type} 
+                      onValueChange={(value) => handleHospitalChange('type', value)}
+                    >
+                      <SelectTrigger id="hospital-type">
+                        <SelectValue placeholder="Select type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="government">Government</SelectItem>
+                        <SelectItem value="private">Private</SelectItem>
+                        <SelectItem value="nonprofit">Non-profit</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="hospital-email">Email Address</Label>
+                    <div className="flex">
+                      <div className="bg-muted p-2 rounded-l-md flex items-center">
+                        <MailIcon className="h-4 w-4 text-muted-foreground" />
+                      </div>
+                      <Input 
+                        id="hospital-email" 
+                        type="email" 
+                        className="rounded-l-none"
+                        value={hospitalSettings.email} 
+                        onChange={(e) => handleHospitalChange('email', e.target.value)} 
+                      />
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="hospital-phone">Phone Number</Label>
+                    <div className="flex">
+                      <div className="bg-muted p-2 rounded-l-md flex items-center">
+                        <PhoneIcon className="h-4 w-4 text-muted-foreground" />
+                      </div>
+                      <Input 
+                        id="hospital-phone" 
+                        className="rounded-l-none"
+                        value={hospitalSettings.phone} 
+                        onChange={(e) => handleHospitalChange('phone', e.target.value)} 
+                      />
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-2 md:col-span-2">
+                    <Label htmlFor="hospital-address">Address</Label>
+                    <Input 
+                      id="hospital-address" 
+                      value={hospitalSettings.address} 
+                      onChange={(e) => handleHospitalChange('address', e.target.value)} 
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="hospital-website">Website</Label>
+                    <div className="flex">
+                      <div className="bg-muted p-2 rounded-l-md flex items-center">
+                        <GlobeIcon className="h-4 w-4 text-muted-foreground" />
+                      </div>
+                      <Input 
+                        id="hospital-website" 
+                        className="rounded-l-none"
+                        value={hospitalSettings.website} 
+                        onChange={(e) => handleHospitalChange('website', e.target.value)} 
+                      />
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="hospital-logo">Logo</Label>
+                    <div className="flex items-center gap-4">
+                      <div className="h-16 w-16 rounded-md border flex items-center justify-center bg-muted">
+                        <ImageIcon className="h-8 w-8 text-muted-foreground" />
+                      </div>
+                      <Button variant="outline">Upload New Logo</Button>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+          
+          <TabsContent value="system" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>System Preferences</CardTitle>
+                <CardDescription>
+                  Configure system-wide settings and defaults
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <Label htmlFor="theme">Theme</Label>
+                    <Select 
+                      value={systemSettings.theme} 
+                      onValueChange={(value) => handleSystemChange('theme', value)}
+                    >
+                      <SelectTrigger id="theme">
+                        <SelectValue placeholder="Select theme" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="light">Light</SelectItem>
+                        <SelectItem value="dark">Dark</SelectItem>
+                        <SelectItem value="system">System Default</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="language">Language</Label>
+                    <Select 
+                      value={systemSettings.language} 
+                      onValueChange={(value) => handleSystemChange('language', value)}
+                    >
+                      <SelectTrigger id="language">
+                        <SelectValue placeholder="Select language" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="en">English</SelectItem>
+                        <SelectItem value="es">Spanish</SelectItem>
+                        <SelectItem value="fr">French</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="date-format">Date Format</Label>
+                    <Select 
+                      value={systemSettings.dateFormat} 
+                      onValueChange={(value) => handleSystemChange('dateFormat', value)}
+                    >
+                      <SelectTrigger id="date-format">
+                        <SelectValue placeholder="Select date format" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="MM/DD/YYYY">MM/DD/YYYY</SelectItem>
+                        <SelectItem value="DD/MM/YYYY">DD/MM/YYYY</SelectItem>
+                        <SelectItem value="YYYY-MM-DD">YYYY-MM-DD</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="time-format">Time Format</Label>
+                    <Select 
+                      value={systemSettings.timeFormat} 
+                      onValueChange={(value) => handleSystemChange('timeFormat', value)}
+                    >
+                      <SelectTrigger id="time-format">
+                        <SelectValue placeholder="Select time format" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="12h">12-hour (AM/PM)</SelectItem>
+                        <SelectItem value="24h">24-hour</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="auto-logout">Auto Logout (minutes)</Label>
+                    <Input 
+                      id="auto-logout" 
+                      type="number" 
+                      min="5"
+                      max="120"
+                      value={systemSettings.autoLogout} 
+                      onChange={(e) => handleSystemChange('autoLogout', parseInt(e.target.value))} 
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="critical-level">Critical Inventory Level</Label>
+                    <Input 
+                      id="critical-level" 
+                      type="number" 
+                      min="1"
+                      max="10"
+                      value={systemSettings.criticalLevel} 
+                      onChange={(e) => handleSystemChange('criticalLevel', parseInt(e.target.value))} 
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Units below this level will trigger low inventory alerts
+                    </p>
+                  </div>
+                </div>
+                
+                <div className="border-t pt-6">
+                  <h3 className="text-lg font-medium mb-4">Advanced Settings</h3>
+                  <div className="space-y-4">
+                    <Button variant="outline">Export All Data</Button>
+                    <Button variant="outline" className="text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/20">
+                      Reset System Defaults
                     </Button>
                   </div>
-                </div>
-                
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Email Address</label>
-                  <Input value="admin@bloodbank.org" disabled />
-                </div>
-                
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Role</label>
-                  <div className="flex items-center gap-2">
-                    <ShieldIcon className="h-4 w-4 text-indigo-500" />
-                    <span className="text-sm">Administrator</span>
-                  </div>
-                </div>
-                
-                <div className="rounded-md border p-4 bg-muted/30">
-                  <div className="flex items-center gap-2 mb-2">
-                    <ServerIcon className="h-4 w-4 text-amber-500" />
-                    <span className="font-medium">Database Information</span>
-                  </div>
-                  <p className="text-sm text-muted-foreground mb-1">
-                    Connected to: <span className="font-mono">blood_bank_prod_db</span>
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    Last backup: <span className="font-mono">2023-05-30 04:00 UTC</span>
-                  </p>
                 </div>
               </CardContent>
             </Card>
           </TabsContent>
         </Tabs>
-        
-        <div className="flex justify-end gap-4">
-          <Button variant="outline" onClick={handleResetSettings} className="transition-all duration-300">
-            Reset to Defaults
-          </Button>
-          <Button 
-            onClick={handleSaveSettings} 
-            className="bg-bloodRed-500 hover:bg-bloodRed-600 text-white transition-all duration-300"
-          >
-            <SaveIcon className="h-4 w-4 mr-2" />
-            Save Settings
-          </Button>
-        </div>
       </div>
     </>
   );

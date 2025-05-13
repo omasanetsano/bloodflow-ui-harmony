@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet';
 import { 
@@ -52,9 +51,10 @@ import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import BloodTypeTag from '@/components/BloodTypeTag';
 import StatusBadge from '@/components/StatusBadge';
-import { HOSPITAL_NAME } from './Dashboard';
+import { DEFAULT_HOSPITAL_NAME } from '@/lib/constants';
 import { bloodRequestService, inventoryService } from '@/lib/mockData';
 import { BloodRequest, BloodType, InventoryStats } from '@/lib/types';
+import { getHospitalInfo } from '@/utils/auth';
 
 const formSchema = z.object({
   patientName: z.string().min(1, { message: 'Patient name is required' }),
@@ -74,7 +74,9 @@ export default function BloodRequests() {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState<string>('all');
   const [open, setOpen] = useState(false);
-
+  const [hospital, setHospital] = useState<any>(null);
+  const hospitalName = hospital?.name || DEFAULT_HOSPITAL_NAME;
+  
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -83,7 +85,7 @@ export default function BloodRequests() {
       bloodType: 'A+',
       quantity: 1,
       urgency: 'Medium',
-      hospital: HOSPITAL_NAME,
+      hospital: hospitalName,
       notes: '',
     },
   });
@@ -98,6 +100,10 @@ export default function BloodRequests() {
       
       setRequests(requestsData);
       setInventory(inventoryData);
+      
+      // Fetch hospital info
+      const hospitalInfo = await getHospitalInfo();
+      setHospital(hospitalInfo);
     } catch (error) {
       console.error('Error fetching data:', error);
       toast.error('Failed to load data');
@@ -224,7 +230,7 @@ export default function BloodRequests() {
   return (
     <>
       <Helmet>
-        <title>Blood Requests | {HOSPITAL_NAME} Blood Bank</title>
+        <title>Blood Requests | {hospitalName} Blood Bank</title>
       </Helmet>
       
       <div className="flex flex-col gap-8">
