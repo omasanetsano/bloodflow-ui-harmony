@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet';
 import { 
@@ -41,9 +42,7 @@ import Logo from '@/components/Logo';
 import { APP_NAME } from '@/lib/constants';
 import { jsPDF } from 'jspdf';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { getHospitalInfo } from '@/utils/auth';
-
-export const HOSPITAL_NAME = "LifeFlow Medical Center";
+import { getHospitalInfo, Hospital } from '@/utils/auth';
 
 export default function Dashboard() {
   const [inventoryStats, setInventoryStats] = useState<InventoryStats[]>([]);
@@ -51,8 +50,8 @@ export default function Dashboard() {
   const [urgentRequests, setUrgentRequests] = useState<BloodRequest[]>([]);
   const [donationStats, setDonationStats] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [hospital, setHospital] = useState<Hospital | null>(null);
   const isMobile = useIsMobile();
-  const hospital = getHospitalInfo();
   const hospitalName = hospital?.name || "Hospital";
 
   const fetchDashboardData = async () => {
@@ -105,6 +104,10 @@ export default function Dashboard() {
       }));
       
       setDonationStats(donationStatsArray);
+
+      // Fetch hospital info
+      const hospitalInfo = await getHospitalInfo();
+      setHospital(hospitalInfo);
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
       toast.error('Failed to load dashboard data');

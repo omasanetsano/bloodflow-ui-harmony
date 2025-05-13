@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet";
@@ -53,7 +52,11 @@ const Register = () => {
       
       // Register with our Supabase auth utility
       const success = await registerUser({
-        ...data,
+        name: data.name,
+        email: data.email,
+        password: data.password,
+        hospitalName: data.hospitalName,
+        hospitalType: data.hospitalType as HospitalType,
       });
       
       if (success) {

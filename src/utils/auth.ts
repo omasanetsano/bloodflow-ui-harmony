@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { User, Session } from '@supabase/supabase-js';
 
@@ -128,25 +127,31 @@ export const logout = async (): Promise<void> => {
 };
 
 // Get current hospital info
-export const getHospitalInfo = async (): Promise<Hospital | null> => {
+export const getHospitalInfo = (): Promise<Hospital | null> => {
   try {
-    const { data: sessionData } = await supabase.auth.getSession();
-    if (!sessionData.session) return null;
-    
-    const { data, error } = await supabase
-      .from('hospitals')
-      .select('*')
-      .single();
-    
-    if (error) {
-      console.error("Error fetching hospital info:", error);
-      return null;
-    }
-    
-    return data as Hospital;
+    return new Promise(async (resolve) => {
+      const { data: sessionData } = await supabase.auth.getSession();
+      if (!sessionData.session) {
+        resolve(null);
+        return;
+      }
+      
+      const { data, error } = await supabase
+        .from('hospitals')
+        .select('*')
+        .single();
+      
+      if (error) {
+        console.error("Error fetching hospital info:", error);
+        resolve(null);
+        return;
+      }
+      
+      resolve(data as Hospital);
+    });
   } catch (error) {
     console.error("Error getting hospital info:", error);
-    return null;
+    return Promise.resolve(null);
   }
 };
 
