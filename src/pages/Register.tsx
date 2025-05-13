@@ -13,7 +13,7 @@ import { useToast } from "@/hooks/use-toast";
 import Logo from "@/components/Logo";
 import { APP_NAME } from "@/lib/constants";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { register as registerUser, HospitalType, Hospital } from "@/utils/auth";
+import { register as registerUser, HospitalType } from "@/utils/auth";
 
 const registerSchema = z.object({
   name: z.string().min(2, "Name is required"),
@@ -51,10 +51,9 @@ const Register = () => {
     try {
       console.log("Registration data:", data);
       
-      // Register with our auth utility (will be replaced with Supabase)
+      // Register with our Supabase auth utility
       const success = await registerUser({
         ...data,
-        userType: "hospital", // Always set as hospital admin
       });
       
       if (success) {

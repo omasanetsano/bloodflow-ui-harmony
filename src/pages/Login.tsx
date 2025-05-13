@@ -13,10 +13,11 @@ import { useToast } from "@/hooks/use-toast";
 import Logo from "@/components/Logo";
 import { APP_NAME } from "@/lib/constants";
 import { login } from "@/utils/auth";
+import { supabase } from "@/integrations/supabase/client";
 
 const loginSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
-  password: z.string().min(8, "Password must be at least 8 characters"),
+  password: z.string().min(1, "Password is required"),
 });
 
 type LoginFormValues = z.infer<typeof loginSchema>;
@@ -37,9 +38,9 @@ const Login = () => {
   const onSubmit = async (data: LoginFormValues) => {
     setIsLoading(true);
     try {
-      console.log("Login credentials:", data);
+      console.log("Login attempt for:", data.email);
       
-      // Login with our auth utility (will be replaced with Supabase)
+      // Login with our Supabase auth utility
       const success = await login(data.email, data.password);
       
       if (success) {
@@ -49,9 +50,7 @@ const Login = () => {
         });
         
         // Redirect to dashboard after successful login
-        setTimeout(() => {
-          navigate("/");
-        }, 1500);
+        navigate("/");
       } else {
         toast({
           title: "Login failed",

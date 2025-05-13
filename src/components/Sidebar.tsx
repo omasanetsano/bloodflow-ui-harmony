@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { 
   DropletIcon, 
@@ -16,8 +16,9 @@ import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import Logo from '@/components/Logo';
 import { APP_NAME } from '@/lib/constants';
-import { logout, getAdminInfo, getHospitalInfo } from '@/utils/auth';
+import { logout, getAdminInfo, Hospital } from '@/utils/auth';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 
 type NavItem = {
   name: string;
@@ -34,19 +35,34 @@ const navItems: NavItem[] = [
   { name: 'Settings', path: '/settings', icon: <Settings2Icon className="w-5 h-5" /> },
 ];
 
-export default function Sidebar() {
+interface SidebarProps {
+  hospital: Hospital | null;
+}
+
+export default function Sidebar({ hospital }: SidebarProps) {
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
   const location = useLocation();
-  const admin = getAdminInfo();
-  const adminName = admin?.name || "Admin User";
-  const adminEmail = admin?.email || "admin@bloodbank.org";
-  const hospital = getHospitalInfo();
-  const hospitalName = hospital?.name;
+  const [adminName, setAdminName] = useState("Admin User");
+  const [adminEmail, setAdminEmail] = useState("admin@bloodbank.org");
   
-  const handleLogout = () => {
-    logout();
+  useEffect(() => {
+    const fetchAdminInfo = async () => {
+      const adminInfo = await getAdminInfo();
+      if (adminInfo) {
+        setAdminName(adminInfo.name);
+        setAdminEmail(adminInfo.email);
+      }
+    };
+    
+    fetchAdminInfo();
+  }, []);
+  
+  const handleLogout = async () => {
+    await logout();
     toast.success("Logged out successfully");
   };
+  
+  const hospitalName = hospital?.name;
   
   return (
     <>
@@ -202,4 +218,3 @@ export default function Sidebar() {
     </>
   );
 }
-
