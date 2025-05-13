@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet";
@@ -9,6 +10,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import Logo from "@/components/Logo";
 import { APP_NAME } from "@/lib/constants";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -71,17 +73,17 @@ const Register = () => {
         }, 1500);
       } else {
         toast({
+          variant: "destructive",
           title: "Registration failed",
           description: "An error occurred during registration. Please try again.",
-          variant: "destructive",
         });
       }
     } catch (error) {
       console.error("Registration error:", error);
       toast({
+        variant: "destructive",
         title: "Registration failed",
         description: "An error occurred during registration. Please try again.",
-        variant: "destructive",
       });
     } finally {
       setIsLoading(false);
@@ -172,7 +174,7 @@ const Register = () => {
                     <FormItem>
                       <FormLabel>Email</FormLabel>
                       <FormControl>
-                        <Input placeholder="admin@hospital.com" {...field} />
+                        <Input type="email" placeholder="admin@hospital.com" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>

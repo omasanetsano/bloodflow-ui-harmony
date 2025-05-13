@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { User, Session } from '@supabase/supabase-js';
 
@@ -51,23 +52,9 @@ export const register = async (data: {
   hospitalType: HospitalType;
 }): Promise<boolean> => {
   try {
-    // First, create the user account
-    const { data: authData, error: authError } = await supabase.auth.signUp({
-      email: data.email,
-      password: data.password,
-      options: {
-        data: {
-          name: data.name
-        }
-      }
-    });
-
-    if (authError || !authData.user) {
-      console.error("Registration error:", authError);
-      return false;
-    }
-
-    // Create hospital record
+    console.log("Starting registration process...");
+    
+    // First, create the hospital record since anon can now insert into hospitals
     const { data: hospitalData, error: hospitalError } = await supabase
       .from('hospitals')
       .insert({
@@ -82,6 +69,27 @@ export const register = async (data: {
       console.error("Hospital creation error:", hospitalError);
       return false;
     }
+    
+    console.log("Hospital created successfully, ID:", hospitalData.id);
+    
+    // Next, create the user account
+    const { data: authData, error: authError } = await supabase.auth.signUp({
+      email: data.email,
+      password: data.password,
+      options: {
+        data: {
+          name: data.name,
+          hospital_id: hospitalData.id
+        }
+      }
+    });
+
+    if (authError || !authData.user) {
+      console.error("User registration error:", authError);
+      return false;
+    }
+    
+    console.log("User registered successfully, ID:", authData.user.id);
 
     // Create hospital_users record (linking user to hospital)
     const { error: linkError } = await supabase
@@ -97,6 +105,8 @@ export const register = async (data: {
       console.error("User-hospital link error:", linkError);
       return false;
     }
+    
+    console.log("User-hospital link created successfully");
 
     return true;
   } catch (error) {
@@ -127,28 +137,36 @@ export const logout = async (): Promise<void> => {
 };
 
 // Get current hospital info
-export const getHospitalInfo = (): Promise<Hospital | null> => {
+export const getHospitalInfo = async (): Promise<Hospital | null> => {
   try {
-    return new Promise(async (resolve) => {
-      const { data: sessionData } = await supabase.auth.getSession();
-      if (!sessionData.session) {
-        resolve(null);
-        return;
-      }
-      
-      const { data, error } = await supabase
-        .from('hospitals')
-        .select('*')
-        .single();
-      
-      if (error) {
-        console.error("Error fetching hospital info:", error);
-        resolve(null);
-        return;
-      }
-      
-      resolve(data as Hospital);
-    });
+    const { data: sessionData } = await supabase.auth.getSession();
+    if (!sessionData.session) {
+      return null;
+    }
+    
+    const { data: userHospitalData, error: userHospitalError } = await supabase
+      .from('hospital_users')
+      .select('hospital_id')
+      .eq('user_id', sessionData.session.user.id)
+      .single();
+    
+    if (userHospitalError || !userHospitalData) {
+      console.error("Error fetching hospital link:", userHospitalError);
+      return null;
+    }
+    
+    const { data, error } = await supabase
+      .from('hospitals')
+      .select('*')
+      .eq('id', userHospitalData.hospital_id)
+      .single();
+    
+    if (error) {
+      console.error("Error fetching hospital info:", error);
+      return null;
+    }
+    
+    return data as Hospital;
   } catch (error) {
     console.error("Error getting hospital info:", error);
     return Promise.resolve(null);
