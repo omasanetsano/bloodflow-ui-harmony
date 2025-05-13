@@ -10,10 +10,12 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useToast } from "@/hooks/use-toast";
+import { toast as sonnerToast } from "sonner";
 import Logo from "@/components/Logo";
 import { APP_NAME } from "@/lib/constants";
 import { login } from "@/utils/auth";
 import { supabase } from "@/integrations/supabase/client";
+import { AlertCircle } from "lucide-react";
 
 const loginSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
@@ -26,6 +28,7 @@ const Login = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -37,33 +40,39 @@ const Login = () => {
 
   const onSubmit = async (data: LoginFormValues) => {
     setIsLoading(true);
+    setError(null);
+    
     try {
       console.log("Login attempt for:", data.email);
       
       // Login with our Supabase auth utility
-      const success = await login(data.email, data.password);
+      const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+        email: data.email,
+        password: data.password,
+      });
       
-      if (success) {
-        toast({
-          title: "Login successful",
-          description: "Redirecting to dashboard...",
+      if (authError) {
+        throw authError;
+      }
+      
+      if (authData.session) {
+        sonnerToast.success("Login successful", {
+          description: "Redirecting to dashboard..."
         });
         
         // Redirect to dashboard after successful login
         navigate("/");
       } else {
-        toast({
-          title: "Login failed",
-          description: "Please check your credentials and try again",
-          variant: "destructive",
+        setError("Login failed. Please check your credentials and try again.");
+        sonnerToast.error("Login failed", {
+          description: "Please check your credentials and try again"
         });
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Login error:", error);
-      toast({
-        title: "Login failed",
-        description: "Please check your credentials and try again",
-        variant: "destructive",
+      setError(error?.message || "Login failed. Please check your credentials and try again.");
+      sonnerToast.error("Login failed", {
+        description: error?.message || "Please check your credentials and try again"
       });
     } finally {
       setIsLoading(false);
@@ -91,6 +100,13 @@ const Login = () => {
             </CardDescription>
           </CardHeader>
           <CardContent>
+            {error && (
+              <div className="mb-4 p-3 bg-destructive/15 text-destructive rounded-md flex items-start gap-2">
+                <AlertCircle className="h-5 w-5 mt-0.5 flex-shrink-0" />
+                <div>{error}</div>
+              </div>
+            )}
+            
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                 <FormField

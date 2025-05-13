@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { User, Session } from '@supabase/supabase-js';
 
@@ -67,7 +66,7 @@ export const register = async (data: {
 
     if (hospitalError) {
       console.error("Hospital creation error:", hospitalError);
-      return false;
+      throw new Error(`Failed to create hospital: ${hospitalError.message}`);
     }
     
     console.log("Hospital created successfully, ID:", hospitalData.id);
@@ -86,7 +85,7 @@ export const register = async (data: {
 
     if (authError || !authData.user) {
       console.error("User registration error:", authError);
-      return false;
+      throw new Error(`Failed to create user: ${authError?.message || "Unknown error"}`);
     }
     
     console.log("User registered successfully, ID:", authData.user.id);
@@ -103,15 +102,26 @@ export const register = async (data: {
 
     if (linkError) {
       console.error("User-hospital link error:", linkError);
-      return false;
+      throw new Error(`Failed to link user to hospital: ${linkError.message}`);
     }
     
     console.log("User-hospital link created successfully");
 
+    // Automatically log the user in
+    const { error: signInError } = await supabase.auth.signInWithPassword({
+      email: data.email,
+      password: data.password
+    });
+
+    if (signInError) {
+      console.error("Auto sign-in error:", signInError);
+      // We don't throw here as registration was successful
+    }
+
     return true;
-  } catch (error) {
+  } catch (error: any) {
     console.error("Registration error:", error);
-    return false;
+    throw error; // Re-throw to handle in the component
   }
 };
 

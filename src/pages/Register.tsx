@@ -10,11 +10,12 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useToast } from "@/hooks/use-toast";
-import { toast } from "sonner";
+import { toast as sonnerToast } from "sonner";
 import Logo from "@/components/Logo";
 import { APP_NAME } from "@/lib/constants";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { register as registerUser, HospitalType } from "@/utils/auth";
+import { AlertCircle } from "lucide-react";
 
 const registerSchema = z.object({
   name: z.string().min(2, "Name is required"),
@@ -34,6 +35,7 @@ const Register = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const form = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
@@ -49,6 +51,8 @@ const Register = () => {
 
   const onSubmit = async (data: RegisterFormValues) => {
     setIsLoading(true);
+    setError(null);
+    
     try {
       console.log("Registration data:", data);
       
@@ -62,9 +66,8 @@ const Register = () => {
       });
       
       if (success) {
-        toast({
-          title: "Registration successful",
-          description: "Your account has been created. Redirecting to dashboard...",
+        sonnerToast.success("Registration successful", {
+          description: "Your account has been created. Redirecting to dashboard..."
         });
         
         // Redirect to dashboard after successful registration
@@ -72,18 +75,16 @@ const Register = () => {
           navigate("/");
         }, 1500);
       } else {
-        toast({
-          variant: "destructive",
-          title: "Registration failed",
-          description: "An error occurred during registration. Please try again.",
+        setError("Registration failed. Please try again or contact support.");
+        sonnerToast.error("Registration failed", {
+          description: "An error occurred during registration. Please try again."
         });
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Registration error:", error);
-      toast({
-        variant: "destructive",
-        title: "Registration failed",
-        description: "An error occurred during registration. Please try again.",
+      setError(error?.message || "An error occurred during registration. Please try again.");
+      sonnerToast.error("Registration failed", {
+        description: error?.message || "An error occurred during registration. Please try again."
       });
     } finally {
       setIsLoading(false);
@@ -111,6 +112,13 @@ const Register = () => {
             </CardDescription>
           </CardHeader>
           <CardContent>
+            {error && (
+              <div className="mb-4 p-3 bg-destructive/15 text-destructive rounded-md flex items-start gap-2">
+                <AlertCircle className="h-5 w-5 mt-0.5 flex-shrink-0" />
+                <div>{error}</div>
+              </div>
+            )}
+            
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                 <FormField
