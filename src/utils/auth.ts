@@ -54,7 +54,7 @@ export const register = async (data: {
   try {
     console.log("Starting registration process...");
     
-    // First, create the user account
+    // First, create the user account and automatically sign them in
     const { data: authData, error: authError } = await supabase.auth.signUp({
       email: data.email,
       password: data.password,
@@ -78,7 +78,12 @@ export const register = async (data: {
     
     console.log("User registered successfully, ID:", authData.user.id);
 
-    // Now that user is created, create the hospital record (now authenticated)
+    // If the user needs email confirmation, we can't proceed with hospital creation
+    if (!authData.session) {
+      throw new Error("Please check your email and confirm your account before completing registration.");
+    }
+
+    // Now that user is authenticated, create the hospital record
     const { data: hospitalData, error: hospitalError } = await supabase
       .from('hospitals')
       .insert({
