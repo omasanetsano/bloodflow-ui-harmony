@@ -54,7 +54,31 @@ export const register = async (data: {
   try {
     console.log("Starting registration process...");
     
-    // First, create the hospital record (now allowed with new RLS policy)
+    // First, create the user account
+    const { data: authData, error: authError } = await supabase.auth.signUp({
+      email: data.email,
+      password: data.password,
+      options: {
+        data: {
+          name: data.name,
+          hospital_name: data.hospitalName,
+          hospital_type: data.hospitalType
+        }
+      }
+    });
+
+    if (authError) {
+      console.error("User registration error:", authError);
+      throw new Error(`Failed to create user: ${authError.message}`);
+    }
+
+    if (!authData.user) {
+      throw new Error("User creation failed: No user returned");
+    }
+    
+    console.log("User registered successfully, ID:", authData.user.id);
+
+    // Now that user is created, create the hospital record (now authenticated)
     const { data: hospitalData, error: hospitalError } = await supabase
       .from('hospitals')
       .insert({
@@ -71,29 +95,6 @@ export const register = async (data: {
     }
     
     console.log("Hospital created successfully, ID:", hospitalData.id);
-    
-    // Create the user account
-    const { data: authData, error: authError } = await supabase.auth.signUp({
-      email: data.email,
-      password: data.password,
-      options: {
-        data: {
-          name: data.name,
-          hospital_id: hospitalData.id
-        }
-      }
-    });
-
-    if (authError) {
-      console.error("User registration error:", authError);
-      throw new Error(`Failed to create user: ${authError.message}`);
-    }
-
-    if (!authData.user) {
-      throw new Error("User creation failed: No user returned");
-    }
-    
-    console.log("User registered successfully, ID:", authData.user.id);
 
     // Create hospital_users record (linking user to hospital)
     const { error: linkError } = await supabase
