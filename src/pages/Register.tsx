@@ -56,8 +56,7 @@ const Register = () => {
     try {
       console.log("Registration data:", data);
       
-      // Register with our Supabase auth utility
-      const success = await registerUser({
+      await registerUser({
         name: data.name,
         email: data.email,
         password: data.password,
@@ -65,26 +64,31 @@ const Register = () => {
         hospitalType: data.hospitalType as HospitalType,
       });
       
-      if (success) {
-        sonnerToast.success("Registration successful", {
-          description: "Your account has been created. Redirecting to dashboard..."
-        });
-        
-        // Redirect to dashboard after successful registration
-        setTimeout(() => {
-          navigate("/");
-        }, 1500);
-      } else {
-        setError("Registration failed. Please try again or contact support.");
-        sonnerToast.error("Registration failed", {
-          description: "An error occurred during registration. Please try again."
-        });
-      }
+      sonnerToast.success("Registration successful", {
+        description: "Your account has been created. Please check your email to confirm your account."
+      });
+      
+      // Redirect to login page
+      setTimeout(() => {
+        navigate("/login");
+      }, 2000);
     } catch (error: any) {
       console.error("Registration error:", error);
-      setError(error?.message || "An error occurred during registration. Please try again.");
+      let errorMessage = "Registration failed. Please try again.";
+      
+      if (error?.message) {
+        if (error.message.includes("User already registered")) {
+          errorMessage = "An account with this email already exists. Please try logging in instead.";
+        } else if (error.message.includes("Password should be at least")) {
+          errorMessage = "Password must be at least 6 characters long.";
+        } else {
+          errorMessage = error.message;
+        }
+      }
+      
+      setError(errorMessage);
       sonnerToast.error("Registration failed", {
-        description: error?.message || "An error occurred during registration. Please try again."
+        description: errorMessage
       });
     } finally {
       setIsLoading(false);

@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { User, Session } from '@supabase/supabase-js';
 
@@ -32,13 +33,13 @@ export const login = async (email: string, password: string): Promise<boolean> =
 
     if (error) {
       console.error("Login error:", error.message);
-      return false;
+      throw error;
     }
 
     return !!data.session;
   } catch (error) {
     console.error("Login error:", error);
-    return false;
+    throw error;
   }
 };
 
@@ -53,7 +54,7 @@ export const register = async (data: {
   try {
     console.log("Starting registration process...");
     
-    // First, create the hospital record since anon can now insert into hospitals
+    // First, create the hospital record (now allowed with new RLS policy)
     const { data: hospitalData, error: hospitalError } = await supabase
       .from('hospitals')
       .insert({
@@ -71,7 +72,7 @@ export const register = async (data: {
     
     console.log("Hospital created successfully, ID:", hospitalData.id);
     
-    // Next, create the user account
+    // Create the user account
     const { data: authData, error: authError } = await supabase.auth.signUp({
       email: data.email,
       password: data.password,
@@ -83,9 +84,13 @@ export const register = async (data: {
       }
     });
 
-    if (authError || !authData.user) {
+    if (authError) {
       console.error("User registration error:", authError);
-      throw new Error(`Failed to create user: ${authError?.message || "Unknown error"}`);
+      throw new Error(`Failed to create user: ${authError.message}`);
+    }
+
+    if (!authData.user) {
+      throw new Error("User creation failed: No user returned");
     }
     
     console.log("User registered successfully, ID:", authData.user.id);
@@ -107,21 +112,10 @@ export const register = async (data: {
     
     console.log("User-hospital link created successfully");
 
-    // Automatically log the user in
-    const { error: signInError } = await supabase.auth.signInWithPassword({
-      email: data.email,
-      password: data.password
-    });
-
-    if (signInError) {
-      console.error("Auto sign-in error:", signInError);
-      // We don't throw here as registration was successful
-    }
-
     return true;
   } catch (error: any) {
     console.error("Registration error:", error);
-    throw error; // Re-throw to handle in the component
+    throw error;
   }
 };
 
@@ -179,7 +173,7 @@ export const getHospitalInfo = async (): Promise<Hospital | null> => {
     return data as Hospital;
   } catch (error) {
     console.error("Error getting hospital info:", error);
-    return Promise.resolve(null);
+    return null;
   }
 };
 

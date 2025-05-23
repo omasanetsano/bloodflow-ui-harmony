@@ -14,7 +14,6 @@ import { toast as sonnerToast } from "sonner";
 import Logo from "@/components/Logo";
 import { APP_NAME } from "@/lib/constants";
 import { login } from "@/utils/auth";
-import { supabase } from "@/integrations/supabase/client";
 import { AlertCircle } from "lucide-react";
 
 const loginSchema = z.object({
@@ -45,34 +44,35 @@ const Login = () => {
     try {
       console.log("Login attempt for:", data.email);
       
-      // Login with our Supabase auth utility
-      const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
-        email: data.email,
-        password: data.password,
-      });
+      const success = await login(data.email, data.password);
       
-      if (authError) {
-        throw authError;
-      }
-      
-      if (authData.session) {
+      if (success) {
         sonnerToast.success("Login successful", {
           description: "Redirecting to dashboard..."
         });
         
-        // Redirect to dashboard after successful login
-        navigate("/");
-      } else {
-        setError("Login failed. Please check your credentials and try again.");
-        sonnerToast.error("Login failed", {
-          description: "Please check your credentials and try again"
-        });
+        // Small delay to show success message
+        setTimeout(() => {
+          navigate("/");
+        }, 1000);
       }
     } catch (error: any) {
       console.error("Login error:", error);
-      setError(error?.message || "Login failed. Please check your credentials and try again.");
+      let errorMessage = "Login failed. Please check your credentials and try again.";
+      
+      if (error?.message) {
+        if (error.message.includes("Invalid login credentials")) {
+          errorMessage = "Invalid email or password. Please check your credentials.";
+        } else if (error.message.includes("Email not confirmed")) {
+          errorMessage = "Please check your email and confirm your account before logging in.";
+        } else {
+          errorMessage = error.message;
+        }
+      }
+      
+      setError(errorMessage);
       sonnerToast.error("Login failed", {
-        description: error?.message || "Please check your credentials and try again"
+        description: errorMessage
       });
     } finally {
       setIsLoading(false);
