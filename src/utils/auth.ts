@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { User, Session } from '@supabase/supabase-js';
 
@@ -77,11 +76,6 @@ export const register = async (data: {
     }
     
     console.log("User registered successfully, ID:", authData.user.id);
-
-    // If the user needs email confirmation, we can't proceed with hospital creation
-    if (!authData.session) {
-      throw new Error("Please check your email and confirm your account before completing registration.");
-    }
 
     // Now that user is authenticated, create the hospital record
     const { data: hospitalData, error: hospitalError } = await supabase
